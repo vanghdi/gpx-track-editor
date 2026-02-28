@@ -14,6 +14,7 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   const insertSegmentAt = useTrackStore((s) => s.insertSegmentAt);
   const segments = useTrackStore((s) => s.workingTrack.segments);
   const routingProfile = useTrackStore((s) => s.routingProfile);
+  const apiKey = useTrackStore((s) => s.apiKey);
   const [routing, setRouting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -39,7 +40,7 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
       const toSeg = segments[index + 1];
       const from = fromSeg.points[fromSeg.points.length - 1];
       const to = toSeg.points[0];
-      const points = await getRoute([from, to], routingProfile);
+      const points = await getRoute([from, to], routingProfile, apiKey);
       insertSegmentAt(index, { type: 'routed', points, waypoints: [from, to] });
     } catch (e) {
       setError(e.message || 'Routing failed.');

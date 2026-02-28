@@ -12,6 +12,7 @@ export default function PointSelector() {
   const prependSegment = useTrackStore((s) => s.prependSegment);
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
   const routingProfile = useTrackStore((s) => s.routingProfile);
+  const apiKey = useTrackStore((s) => s.apiKey);
 
   useMapEvents({
     async click(e) {
@@ -26,7 +27,7 @@ export default function PointSelector() {
         if (!segments.length) return;
         const firstPt = segments[0].points[0];
         try {
-          const points = await getRoute([latlng, firstPt], routingProfile);
+          const points = await getRoute([latlng, firstPt], routingProfile, apiKey);
           prependSegment({ type: 'routed', points, waypoints: [latlng, firstPt] });
         } catch (err) {
           console.error('Free start routing failed:', err.message);
@@ -42,7 +43,7 @@ export default function PointSelector() {
         const lastSeg = segments[segments.length - 1];
         const lastPt = lastSeg.points[lastSeg.points.length - 1];
         try {
-          const points = await getRoute([lastPt, latlng], routingProfile);
+          const points = await getRoute([lastPt, latlng], routingProfile, apiKey);
           addSegment({ type: 'routed', points, waypoints: [lastPt, latlng] });
         } catch (err) {
           console.error('Free end routing failed:', err.message);

@@ -49,6 +49,7 @@ function RoutedSegmentItem({ seg }) {
   const updateRoutedSegmentWaypoints = useTrackStore((s) => s.updateRoutedSegmentWaypoints);
   const [loading, setLoading] = useState(false);
   const routingProfile = useTrackStore((s) => s.routingProfile);
+  const apiKey = useTrackStore((s) => s.apiKey);
 
   const waypoints = seg.waypoints || (seg.points?.length >= 2
     ? [seg.points[0], seg.points[seg.points.length - 1]]
@@ -58,7 +59,7 @@ function RoutedSegmentItem({ seg }) {
     if (newWaypoints.length < 2) return;
     setLoading(true);
     try {
-      const newPoints = await getRoute(newWaypoints, routingProfile);
+      const newPoints = await getRoute(newWaypoints, routingProfile, apiKey);
       updateRoutedSegmentWaypoints(seg.id, newWaypoints, newPoints);
     } catch {
       // Keep existing route on failure

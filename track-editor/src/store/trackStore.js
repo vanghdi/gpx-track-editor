@@ -171,6 +171,13 @@ const useTrackStore = create((set, get) => ({
   mapView: { lat: 50.82, lng: 5.6, zoom: 13 },
   setMapView: (lat, lng, zoom) => set({ mapView: { lat, lng, zoom } }),
 
+  // ── API key (persisted in localStorage) ──────────────────────────────────────
+  apiKey: localStorage.getItem('ors_api_key') || '',
+  setApiKey: (key) => {
+    localStorage.setItem('ors_api_key', key);
+    set({ apiKey: key });
+  },
+
   // ── Routing settings ─────────────────────────────────────────────────────────
   routingProfile: 'cycling-mountain', // cycling-mountain | cycling-regular | foot-hiking
   setRoutingProfile: (profile) => set({ routingProfile: profile }),
