@@ -1,3 +1,15 @@
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
 import useTrackStore from '../../store/trackStore';
 import SegmentItem from './SegmentItem';
 import { pathDistanceKm } from '../../utils/geoUtils';
@@ -24,12 +36,24 @@ export default function WorkingTrackBuilder() {
   const startFreeEndPicking = useTrackStore((s) => s.startFreeEndPicking);
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
   const getGapIndices = useTrackStore((s) => s.getGapIndices);
+  const reorderSegments = useTrackStore((s) => s.reorderSegments);
   const routingProfile = useTrackStore((s) => s.routingProfile);
   const setRoutingProfile = useTrackStore((s) => s.setRoutingProfile);
 
   const gapIndices = new Set(getGapIndices());
   const totalKm = segments.reduce((sum, seg) => sum + pathDistanceKm(seg.points || []), 0);
   const hasSegments = segments.length > 0;
+
+  const sensors = useSensors(useSensor(PointerSensor, {
+    activationConstraint: { distance: 5 },
+  }));
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const fromIdx = segments.findIndex((s) => s.id === active.id);
+    const toIdx = segments.findIndex((s) => s.id === over.id);
+    if (fromIdx !== -1 && toIdx !== -1) reorderSegments(fromIdx, toIdx);
+  };
 
   return (
     <div className="section">
@@ -66,15 +90,19 @@ export default function WorkingTrackBuilder() {
         {!hasSegments ? (
           <p className="empty-hint">No segments yet. Click 'Add Segment' to start.</p>
         ) : (
-          segments.map((seg, i) => (
-            <SegmentItem
-              key={seg.id}
-              segment={seg}
-              index={i}
-              isLast={i === segments.length - 1}
-              hasGapAfter={gapIndices.has(i)}
-            />
-          ))
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={segments.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              {segments.map((seg, i) => (
+                <SegmentItem
+                  key={seg.id}
+                  segment={seg}
+                  index={i}
+                  isLast={i === segments.length - 1}
+                  hasGapAfter={gapIndices.has(i)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 

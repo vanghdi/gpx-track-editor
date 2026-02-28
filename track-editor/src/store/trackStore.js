@@ -93,6 +93,14 @@ const useTrackStore = create((set, get) => ({
       },
     })),
 
+  reorderSegments: (fromIndex, toIndex) =>
+    set((state) => {
+      const segs = [...state.workingTrack.segments];
+      const [moved] = segs.splice(fromIndex, 1);
+      segs.splice(toIndex, 0, moved);
+      return { workingTrack: { ...state.workingTrack, segments: segs } };
+    }),
+
   insertSegmentAt: (index, segment) =>
     set((state) => {
       const segs = state.workingTrack.segments;

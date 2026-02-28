@@ -568,6 +568,26 @@ body {
 }
 .segment-item--routed:hover { border-left-color: var(--amber); }
 
+.segment-item--dragging {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+  touch-action: none;
+}
+.drag-handle:hover { opacity: 1; color: var(--text); }
+.drag-handle:active { cursor: grabbing; }
+
 .segment-item__label {
   flex: 1;
   font-size: 12px;

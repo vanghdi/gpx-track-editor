@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import useTrackStore from '../../store/trackStore';
 import { getRoute } from '../../utils/routingService';
 import { pathDistanceKm } from '../../utils/geoUtils';
@@ -14,6 +16,16 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   const routingProfile = useTrackStore((s) => s.routingProfile);
   const [routing, setRouting] = useState(false);
   const [error, setError] = useState(null);
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: segment.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 999 : undefined,
+  };
 
   const label = segment.type === 'routed'
     ? `🔗 Routed link`
@@ -37,8 +49,11 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   };
 
   return (
-    <>
-      <div className={`segment-item ${segment.type === 'routed' ? 'segment-item--routed' : ''}`}>
+    <div ref={setNodeRef} style={style}>
+      <div className={`segment-item ${segment.type === 'routed' ? 'segment-item--routed' : ''}${isDragging ? ' segment-item--dragging' : ''}`}>
+        <button className="drag-handle" {...attributes} {...listeners} title="Drag to reorder">
+          ⠿
+        </button>
         <span className="segment-item__label">{label}</span>
         <span className="segment-item__count">{formatKm(pathDistanceKm(segment.points))}</span>
         <button
@@ -63,6 +78,6 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
