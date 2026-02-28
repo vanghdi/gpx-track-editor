@@ -168,17 +168,55 @@ const useTrackStore = create((set, get) => ({
   setRoutingProfile: (profile) => set({ routingProfile: profile }),
 
   // ── Selection mode for picking segment endpoints ──────────────────────────────
-  selectionMode: null, // null | 'picking_start' | 'picking_end'
+  // null | 'picking_start' | 'picking_end' | 'picking_free_start' | 'picking_free_end'
+  selectionMode: null,
   selectionStart: null, // {lat, lng, trackId, idx}
 
   startSegmentPicking: () =>
     set({ selectionMode: 'picking_start', selectionStart: null }),
+
+  startFreeStartPicking: () =>
+    set({ selectionMode: 'picking_free_start', selectionStart: null }),
+
+  startFreeEndPicking: () =>
+    set({ selectionMode: 'picking_free_end', selectionStart: null }),
 
   setSelectionStart: (point) =>
     set({ selectionMode: 'picking_end', selectionStart: point }),
 
   cancelSelection: () =>
     set({ selectionMode: null, selectionStart: null }),
+
+  // ── Prepend a segment at the start of the working track ──────────────────────
+  prependSegment: (segment) =>
+    set((state) => ({
+      workingTrack: {
+        ...state.workingTrack,
+        segments: [normaliseSegment({ ...segment, id: crypto.randomUUID() }), ...state.workingTrack.segments],
+      },
+    })),
+
+  // ── Convert a GPX slice segment to a routed segment in-place ─────────────────
+  convertSegmentToRouted: (id, clickLat, clickLng) =>
+    set((state) => ({
+      workingTrack: {
+        ...state.workingTrack,
+        segments: state.workingTrack.segments.map((s) => {
+          if (s.id !== id || s.type !== 'gpx_slice') return s;
+          const first = s.points[0];
+          const last = s.points[s.points.length - 1];
+          const click = { lat: clickLat, lng: clickLng };
+          return {
+            ...s,
+            type: 'routed',
+            converted: true,
+            waypoints: [first, click, last],
+            // Keep existing points as display geometry until ORS re-routes
+            points: s.points,
+          };
+        }),
+      },
+    })),
 
   // ── Computed helpers ──────────────────────────────────────────────────────────
   /** Returns array of gap indices: index i means gap between segment[i] and segment[i+1] */

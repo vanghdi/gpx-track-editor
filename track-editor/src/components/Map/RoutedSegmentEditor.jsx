@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Marker, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import useTrackStore from '../../store/trackStore';
@@ -48,12 +48,11 @@ function findInsertionIndex(clickLatLng, waypoints) {
 function RoutedSegmentItem({ seg }) {
   const updateRoutedSegmentWaypoints = useTrackStore((s) => s.updateRoutedSegmentWaypoints);
   const [loading, setLoading] = useState(false);
+  const routingProfile = useTrackStore((s) => s.routingProfile);
 
   const waypoints = seg.waypoints || (seg.points?.length >= 2
     ? [seg.points[0], seg.points[seg.points.length - 1]]
     : []);
-
-  const routingProfile = useTrackStore((s) => s.routingProfile);
 
   const reRoute = async (newWaypoints) => {
     if (newWaypoints.length < 2) return;
@@ -67,6 +66,16 @@ function RoutedSegmentItem({ seg }) {
       setLoading(false);
     }
   };
+
+  // Auto-route on mount when segment was just converted from GPX slice
+  const autoRouted = useRef(false);
+  useEffect(() => {
+    if (seg.converted && !autoRouted.current && waypoints.length >= 2) {
+      autoRouted.current = true;
+      reRoute(waypoints);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleWaypointDragEnd = (idx) => (e) => {
     const { lat, lng } = e.target.getLatLng();

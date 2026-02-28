@@ -276,6 +276,19 @@ body {
 }
 
 .btn--full { width: 100%; }
+.btn--flex { flex: 1; }
+
+/* Segment action row: [← Start] [+ Add Segment] [End →] */
+.segment-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.segment-actions .btn--ghost {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 
 /* Download button — the hero action */
 .btn--download {

@@ -15,7 +15,9 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   const [routing, setRouting] = useState(false);
   const [error, setError] = useState(null);
 
-  const label = segment.type === 'routed' ? `🔗 Routed link` : `📍 GPX segment ${index + 1}`;
+  const label = segment.type === 'routed'
+    ? `🔗 Routed link`
+    : `📍 GPX segment ${index + 1}${segment.converted ? ' ~' : ''}`;
 
   const handleRouteGap = async () => {
     setRouting(true);
