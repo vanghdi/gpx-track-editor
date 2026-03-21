@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import TrackLayer from './TrackLayer';
 import WorkingTrackLayer from './WorkingTrackLayer';
 import PointSelector from './PointSelector';
+import LocationMarkerLayer from './LocationMarkerLayer';
 import useTrackStore from '../../store/trackStore';
 import { getBBox } from '../../utils/geoUtils';
 
@@ -126,6 +127,7 @@ export default function MapView() {
         <TrackLayer />
         <WorkingTrackLayer />
         <PointSelector />
+        <LocationMarkerLayer />
         <MapFitter />
         <GeolocationInit />
         <SelectionCursor />

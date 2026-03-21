@@ -171,6 +171,24 @@ const useTrackStore = create((set, get) => ({
   mapView: { lat: 50.82, lng: 5.6, zoom: 13 },
   setMapView: (lat, lng, zoom) => set({ mapView: { lat, lng, zoom } }),
 
+  // ── Location markers (pinned search results) ──────────────────────────────────
+  locationMarkers: [],
+
+  addLocationMarker: (marker) =>
+    set((state) => ({
+      locationMarkers: [
+        ...state.locationMarkers,
+        { ...marker, id: marker.id ?? crypto.randomUUID() },
+      ],
+    })),
+
+  removeLocationMarker: (id) =>
+    set((state) => ({
+      locationMarkers: state.locationMarkers.filter((m) => m.id !== id),
+    })),
+
+  clearLocationMarkers: () => set({ locationMarkers: [] }),
+
   // ── API key (persisted in localStorage) ──────────────────────────────────────
   apiKey: localStorage.getItem('ors_api_key') || '',
   setApiKey: (key) => {
@@ -263,6 +281,7 @@ const useTrackStore = create((set, get) => ({
       workingTrack: { name: 'My Track', segments: [] },
       selectionMode: null,
       selectionStart: null,
+      locationMarkers: [],
     });
   },
 }));

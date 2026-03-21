@@ -4,6 +4,7 @@ import UploadedTrackItem from './UploadedTrackItem';
 import WorkingTrackBuilder from './WorkingTrackBuilder';
 import DownloadButton from './DownloadButton';
 import ApiKeySettings from './ApiKeySettings';
+import LocationSearch from './LocationSearch';
 
 export default function Sidebar() {
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
@@ -27,6 +28,13 @@ export default function Sidebar() {
 
       <div className="sidebar__body">
         <ApiKeySettings />
+
+        <div className="section">
+          <div className="section__header">
+            <h3 className="section__title">Find Location</h3>
+          </div>
+          <LocationSearch />
+        </div>
 
         <div className="section">
           <div className="section__header">
