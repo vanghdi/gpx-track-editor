@@ -221,6 +221,10 @@ const useTrackStore = create((set, get) => ({
   previewMarker: null,
   setPreviewMarker: (marker) => set({ previewMarker: marker }),
 
+  // ── Hovered segment (sidebar hover → map highlight) ───────────────────────────
+  hoveredSegmentId: null,
+  setHoveredSegmentId: (id) => set({ hoveredSegmentId: id }),
+
   // ── API key (persisted in localStorage) ──────────────────────────────────────
   apiKey: localStorage.getItem('ors_api_key') || '',
   setApiKey: (key) => {

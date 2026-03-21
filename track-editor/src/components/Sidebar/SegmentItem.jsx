@@ -15,6 +15,8 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   const segments = useTrackStore((s) => s.workingTrack.segments);
   const routingProfile = useTrackStore((s) => s.routingProfile);
   const apiKey = useTrackStore((s) => s.apiKey);
+  const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
+  const setHoveredSegmentId = useTrackStore((s) => s.setHoveredSegmentId);
   const [routing, setRouting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -28,9 +30,7 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
     zIndex: isDragging ? 999 : undefined,
   };
 
-  const label = segment.type === 'routed'
-    ? `🔗 Routed link`
-    : `📍 GPX segment ${index + 1}${segment.converted ? ' ~' : ''}`;
+  const typeLabel = segment.type === 'routed' ? 'Routed link' : `GPX segment${segment.converted ? ' ~' : ''}`;
 
   const handleRouteGap = async () => {
     setRouting(true);
@@ -49,13 +49,20 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
     }
   };
 
+  const isActive = hoveredSegmentId === segment.id;
+
   return (
     <div ref={setNodeRef} style={style}>
-      <div className={`segment-item ${segment.type === 'routed' ? 'segment-item--routed' : ''}${isDragging ? ' segment-item--dragging' : ''}`}>
+      <div
+        className={`segment-item${segment.type === 'routed' ? ' segment-item--routed' : ''}${isDragging ? ' segment-item--dragging' : ''}${isActive ? ' segment-item--active' : ''}`}
+        onMouseEnter={() => setHoveredSegmentId(segment.id)}
+        onMouseLeave={() => setHoveredSegmentId(null)}
+      >
         <button className="drag-handle" {...attributes} {...listeners} title="Drag to reorder">
           ⠿
         </button>
-        <span className="segment-item__label">{label}</span>
+        <span className="segment-item__badge">#{index + 1}</span>
+        <span className="segment-item__label">{typeLabel}</span>
         <span className="segment-item__count">{formatKm(pathDistanceKm(segment.points))}</span>
         <button
           className="icon-btn icon-btn--danger"

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Marker, Polyline } from 'react-leaflet';
+import { Marker, Polyline, Tooltip } from 'react-leaflet';
+import { Fragment } from 'react';
 import L from 'leaflet';
 import useTrackStore from '../../store/trackStore';
 import { getRoute } from '../../utils/routingService';
@@ -7,7 +8,10 @@ import { haversineDistance } from '../../utils/geoUtils';
 
 const ROUTED_COLOR = '#D98943';
 const LOADING_COLOR = '#94a3b8';
+const HALO_COLOR = '#ffffff';
 const WEIGHT = 5;
+const WEIGHT_HOVERED = 7;
+const HALO_WEIGHT = 12;
 
 function makeWaypointIcon(isEndpoint) {
   const bg = isEndpoint ? '#D98943' : '#ffffff';
@@ -45,11 +49,12 @@ function findInsertionIndex(clickLatLng, waypoints) {
   return bestIdx + 1;
 }
 
-function RoutedSegmentItem({ seg }) {
+function RoutedSegmentItem({ seg, segNumber }) {
   const updateRoutedSegmentWaypoints = useTrackStore((s) => s.updateRoutedSegmentWaypoints);
   const [loading, setLoading] = useState(false);
   const routingProfile = useTrackStore((s) => s.routingProfile);
   const apiKey = useTrackStore((s) => s.apiKey);
+  const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
 
   const waypoints = seg.waypoints || (seg.points?.length >= 2
     ? [seg.points[0], seg.points[seg.points.length - 1]]
@@ -97,18 +102,29 @@ function RoutedSegmentItem({ seg }) {
     reRoute(updated);
   };
 
+  const isHovered = hoveredSegmentId === seg.id;
+  const positions = seg.points.map((p) => [p.lat, p.lng]);
+
   return (
-    <>
+    <Fragment>
+      {isHovered && (
+        <Polyline
+          positions={positions}
+          pathOptions={{ color: HALO_COLOR, weight: HALO_WEIGHT, opacity: 0.55, interactive: false }}
+        />
+      )}
       <Polyline
-        positions={seg.points.map((p) => [p.lat, p.lng])}
+        positions={positions}
         pathOptions={{
           color: loading ? LOADING_COLOR : ROUTED_COLOR,
-          weight: WEIGHT,
-          opacity: loading ? 0.5 : 0.9,
+          weight: isHovered ? WEIGHT_HOVERED : WEIGHT,
+          opacity: loading ? 0.5 : isHovered ? 1.0 : 0.9,
           dashArray: loading ? '6 4' : null,
         }}
         eventHandlers={{ click: handlePolylineClick }}
-      />
+      >
+        <Tooltip sticky>#{segNumber} Routed link</Tooltip>
+      </Polyline>
       {waypoints.map((wp, idx) => (
         <Marker
           key={idx}
@@ -118,12 +134,15 @@ function RoutedSegmentItem({ seg }) {
           eventHandlers={{ dragend: handleWaypointDragEnd(idx) }}
         />
       ))}
-    </>
+    </Fragment>
   );
 }
 
 export default function RoutedSegmentEditor() {
   const segments = useTrackStore((s) => s.workingTrack.segments);
   const routedSegments = segments.filter((s) => s.type === 'routed' && s.points?.length >= 2);
-  return routedSegments.map((seg) => <RoutedSegmentItem key={seg.id} seg={seg} />);
+  return routedSegments.map((seg) => {
+    const segNumber = segments.findIndex((s) => s.id === seg.id) + 1;
+    return <RoutedSegmentItem key={seg.id} seg={seg} segNumber={segNumber} />;
+  });
 }
