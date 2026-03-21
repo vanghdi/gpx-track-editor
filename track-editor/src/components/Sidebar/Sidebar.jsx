@@ -1,17 +1,46 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import useTrackStore from '../../store/trackStore';
-import UploadZone from './UploadZone';
 import UploadedTrackItem from './UploadedTrackItem';
 import WorkingTrackBuilder from './WorkingTrackBuilder';
 import DownloadButton from './DownloadButton';
 import ApiKeySettings from './ApiKeySettings';
 import { useTheme } from '../../hooks/useTheme';
+import { parseGPX } from '../../utils/gpxParser';
 
 export default function Sidebar() {
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
+  const addUploadedTrack = useTrackStore((s) => s.addUploadedTrack);
   const clearAll = useTrackStore((s) => s.clearAll);
-  const [tracksOpen, setTracksOpen] = useState(true);
+  const [tracksOpen, setTracksOpen] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const inputRef = useRef(null);
   const { theme, toggle: toggleTheme } = useTheme();
+
+  const processFiles = (files) => {
+    Array.from(files).forEach((file) => {
+      if (!file.name.toLowerCase().endsWith('.gpx')) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const { name, points } = parseGPX(e.target.result);
+          addUploadedTrack(name || file.name.replace('.gpx', ''), points);
+        } catch {
+          console.error('Failed to parse GPX:', file.name);
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const handleDragOver = (e) => { e.preventDefault(); setDragging(true); };
+  const handleDragLeave = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) setDragging(false);
+  };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    processFiles(e.dataTransfer.files);
+  };
 
   return (
     <aside className="sidebar">
@@ -40,36 +69,52 @@ export default function Sidebar() {
       <div className="sidebar__body">
         <ApiKeySettings />
 
-        <div className="section">
-          <button
-            className="settings-toggle"
-            onClick={() => setTracksOpen((o) => !o)}
-            aria-expanded={tracksOpen}
+        <div className="section section--upload">
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".gpx"
+            multiple
+            style={{ display: 'none' }}
+            onChange={(e) => processFiles(e.target.files)}
+          />
+          <div
+            className={`upload-header${dragging ? ' upload-header--drag' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
-            <span>
-              Upload Tracks
+            <button
+              className="upload-header__pick"
+              onClick={() => inputRef.current?.click()}
+              title="Upload GPX files"
+              aria-label="Upload GPX files"
+            >
+              📂
+            </button>
+            <span className="upload-header__label">
+              GPX Tracks
               {uploadedTracks.length > 0 && (
-                <span style={{ marginLeft: 6, color: 'var(--text-dim)', fontSize: 10 }}>
-                  ({uploadedTracks.length})
-                </span>
+                <span className="upload-header__count">({uploadedTracks.length})</span>
               )}
             </span>
-            <span className="settings-toggle__chevron">{tracksOpen ? '▲' : '▼'}</span>
-          </button>
+            <button
+              className="upload-header__collapse"
+              onClick={() => setTracksOpen((o) => !o)}
+              aria-expanded={tracksOpen}
+              aria-label="Toggle track list"
+              title={tracksOpen ? 'Collapse track list' : 'Expand track list'}
+            >
+              {tracksOpen ? '▲' : '▼'}
+            </button>
+          </div>
 
-          {tracksOpen && (
-            <>
-              <div style={{ padding: '6px 12px 4px' }}>
-                <UploadZone />
-              </div>
-              {uploadedTracks.length > 0 && (
-                <div className="track-list">
-                  {uploadedTracks.map((track) => (
-                    <UploadedTrackItem key={track.id} track={track} />
-                  ))}
-                </div>
-              )}
-            </>
+          {tracksOpen && uploadedTracks.length > 0 && (
+            <div className="track-list">
+              {uploadedTracks.map((track) => (
+                <UploadedTrackItem key={track.id} track={track} />
+              ))}
+            </div>
           )}
         </div>
 
