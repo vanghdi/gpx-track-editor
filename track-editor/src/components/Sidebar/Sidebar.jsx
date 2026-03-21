@@ -60,7 +60,12 @@ export default function Sidebar() {
         <button
           className="btn btn--ghost btn--sm"
           title="New working track (clear all)"
-          onClick={() => { if (confirm('Clear all uploaded tracks and segments?')) clearAll(); }}
+          onClick={() => {
+            if (confirm('Clear all uploaded tracks and segments?')) {
+              clearAll();
+              useTrackStore.temporal.getState().clear();
+            }
+          }}
         >
           🗑 New
         </button>

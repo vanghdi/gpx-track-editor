@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { temporal } from 'zundo';
 import { areConnected } from '../utils/geoUtils';
 
 // Distinct colours for uploaded tracks — high-contrast on OSM light basemap
@@ -27,7 +28,9 @@ function normaliseSegment(seg) {
   return seg;
 }
 
-const useTrackStore = create((set, get) => ({
+const useTrackStore = create(
+  temporal(
+    (set, get) => ({
   // ── Uploaded tracks ──────────────────────────────────────────────────────────
   uploadedTracks: [],
 
@@ -295,6 +298,15 @@ const useTrackStore = create((set, get) => ({
       poiMarkers: [],
     });
   },
-}));
+    }),
+    {
+      // Only snapshot the working track — exclude uploaded tracks, map state, markers, settings
+      partialize: (state) => ({ workingTrack: state.workingTrack }),
+      // Skip snapshot if workingTrack reference is unchanged (selectionMode changes, etc.)
+      equality: (a, b) => a.workingTrack === b.workingTrack,
+      limit: 30,
+    }
+  )
+);
 
 export default useTrackStore;

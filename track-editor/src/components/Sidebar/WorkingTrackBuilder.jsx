@@ -14,6 +14,7 @@ import useTrackStore from '../../store/trackStore';
 import SegmentItem from './SegmentItem';
 import { pathDistanceKm } from '../../utils/geoUtils';
 import { ROUTING_PROFILES } from '../../utils/routingService';
+import { useUndoRedo } from '../../hooks/useUndoRedo';
 
 function formatKm(km) {
   return km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(2)} km`;
@@ -43,6 +44,7 @@ export default function WorkingTrackBuilder() {
   const gapIndices = new Set(getGapIndices());
   const totalKm = segments.reduce((sum, seg) => sum + pathDistanceKm(seg.points || []), 0);
   const hasSegments = segments.length > 0;
+  const { canUndo, canRedo, undo, redo } = useUndoRedo();
 
   const sensors = useSensors(useSensor(PointerSensor, {
     activationConstraint: { distance: 5 },
@@ -64,9 +66,25 @@ export default function WorkingTrackBuilder() {
     <div className="section">
       <div className="section__header">
         <h3 className="section__title">Working Track</h3>
-        {totalKm > 0 && (
-          <span className="section__distance">{formatKm(totalKm)}</span>
-        )}
+        <div className="section__header-actions">
+          {totalKm > 0 && (
+            <span className="section__distance">{formatKm(totalKm)}</span>
+          )}
+          <button
+            className="undo-btn"
+            onClick={undo}
+            disabled={!canUndo}
+            title="Undo (⌘Z)"
+            aria-label="Undo"
+          >↩</button>
+          <button
+            className="undo-btn"
+            onClick={redo}
+            disabled={!canRedo}
+            title="Redo (⌘⇧Z)"
+            aria-label="Redo"
+          >↪</button>
+        </div>
       </div>
 
       <div className="working-track-name">
