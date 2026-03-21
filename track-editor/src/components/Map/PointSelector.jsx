@@ -66,10 +66,10 @@ export default function PointSelector() {
 
         let points;
         if (start.trackId === end.trackId) {
-          const [from, to] = start.idx <= end.idx
-            ? [start.idx, end.idx]
-            : [end.idx, start.idx];
+          const reversed = start.idx > end.idx;
+          const [from, to] = reversed ? [end.idx, start.idx] : [start.idx, end.idx];
           points = sourceTrack.points.slice(from, to + 1);
+          if (reversed) points = [...points].reverse();
         } else {
           const destTrack = uploadedTracks.find((t) => t.id === end.trackId);
           const slice1 = sourceTrack.points.slice(start.idx);
