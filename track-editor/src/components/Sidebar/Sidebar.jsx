@@ -5,11 +5,13 @@ import UploadedTrackItem from './UploadedTrackItem';
 import WorkingTrackBuilder from './WorkingTrackBuilder';
 import DownloadButton from './DownloadButton';
 import ApiKeySettings from './ApiKeySettings';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function Sidebar() {
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const clearAll = useTrackStore((s) => s.clearAll);
   const [tracksOpen, setTracksOpen] = useState(true);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   return (
     <aside className="sidebar">
@@ -18,6 +20,14 @@ export default function Sidebar() {
           <span className="sidebar__title-icon">🗺</span>
           Track Editor
         </h1>
+        <button
+          className="btn btn--ghost btn--sm"
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? '☀' : '◑'}
+        </button>
         <button
           className="btn btn--ghost btn--sm"
           title="New working track (clear all)"

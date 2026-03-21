@@ -31,8 +31,8 @@
 
   /* Text */
   --text:         #dde4ef;
-  --text-muted:   rgba(221, 228, 239, 0.45);
-  --text-dim:     rgba(221, 228, 239, 0.28);
+  --text-muted:   rgba(221, 228, 239, 0.60);
+  --text-dim:     rgba(221, 228, 239, 0.42);
 
   /* Sidebar */
   --sidebar-w:    320px;
@@ -47,6 +47,53 @@
   --r-lg: 12px;
 }
 
+/* ─── Light Theme ────────────────────────────────────────────── */
+[data-theme="light"] {
+  /* Warm parchment surfaces */
+  --bg:           #f0e8d8;
+  --surface:      #e8ddc8;
+  --surface-2:    #dfd3b8;
+  --surface-3:    #d4c5a0;
+  --surface-hover:#c9b88c;
+
+  /* Borders: warm sepia ink */
+  --border:       rgba(70, 48, 20, 0.13);
+  --border-bright:rgba(70, 48, 20, 0.26);
+
+  /* Text: dark field-journal ink */
+  --text:         #261a08;
+  --text-muted:   rgba(38, 26, 8, 0.62);
+  --text-dim:     rgba(38, 26, 8, 0.42);
+}
+
+/* Light-mode sidebar texture: warm sepia grid instead of teal */
+[data-theme="light"] .sidebar::before {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(100, 70, 30, 0.06) 28px,
+      rgba(100, 70, 30, 0.06) 29px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 28px,
+      rgba(100, 70, 30, 0.06) 28px,
+      rgba(100, 70, 30, 0.06) 29px
+    );
+}
+
+/* Light-mode Leaflet overrides for hardcoded dark values */
+[data-theme="light"] .leaflet-container {
+  background: #e0d8c8 !important;
+}
+[data-theme="light"] .leaflet-control-attribution {
+  background: rgba(240, 232, 216, 0.88) !important;
+  color: var(--text-muted) !important;
+}
+
 /* ─── Reset & Base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -59,7 +106,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -186,9 +233,9 @@ body {
 
 .section__title {
   font-family: var(--font-ui);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--teal);
 }
@@ -200,7 +247,7 @@ body {
   justify-content: center;
   gap: 6px;
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.04em;
   border: none;
@@ -270,9 +317,9 @@ body {
 }
 
 .btn--sm {
-  font-size: 12px;
+  font-size: 13px;
   padding: 5px 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 .btn--full { width: 100%; }
@@ -296,7 +343,7 @@ body {
   color: var(--text-muted);
   border: 1px solid var(--border-bright);
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.08em;
   padding: 12px;
@@ -354,7 +401,7 @@ body {
   border-radius: var(--r-md);
   color: var(--text);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 14px;
   padding: 7px 10px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -405,16 +452,16 @@ body {
 
 .upload-zone__text {
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text);
   letter-spacing: 0.04em;
 }
 
 .upload-zone__hint {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 /* ─── Track List ─────────────────────────────────────────────── */
@@ -458,7 +505,7 @@ body {
 
 .track-item__name-text {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text);
   cursor: pointer;
@@ -590,7 +637,7 @@ body {
 
 .segment-item__label {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text);
   white-space: nowrap;
@@ -599,7 +646,7 @@ body {
 }
 
 .segment-item__count {
-  font-size: 12px;
+  font-size: 13px;
   font-family: var(--font-ui);
   font-weight: 400;
   color: var(--text);
@@ -625,15 +672,15 @@ body {
 }
 
 .gap-indicator__label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--amber);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   flex: 1;
 }
 
 .gap-indicator__error {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--coral);
 }
 
@@ -656,7 +703,7 @@ body {
 
 .selection-status__text {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--coral);
   letter-spacing: 0.04em;
@@ -735,9 +782,9 @@ body {
 }
 
 .routing-profile__label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
   white-space: nowrap;
@@ -750,7 +797,7 @@ body {
   border-radius: var(--r-md);
   color: var(--text);
   font-family: var(--font-ui);
-  font-size: 12px;
+  font-size: 13px;
   padding: 6px 8px;
   outline: none;
   cursor: pointer;
@@ -780,9 +827,9 @@ body {
   border: none;
   color: var(--text-muted);
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   padding: 14px 16px 10px;
   cursor: pointer;
@@ -790,7 +837,7 @@ body {
 }
 
 .settings-toggle:hover { color: var(--text); }
-.settings-toggle__chevron { font-size: 9px; }
+.settings-toggle__chevron { font-size: 11px; }
 
 .settings-body {
   padding: 0 0 12px;
@@ -803,13 +850,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   letter-spacing: 0.04em;
 }
 
 .settings-link {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--teal);
   text-decoration: none;
   transition: color 0.12s ease;
@@ -817,10 +864,10 @@ body {
 
 .settings-link:hover { color: var(--teal-light); }
 
-.input--mono { font-family: monospace; font-size: 12px; letter-spacing: 0.04em; }
+.input--mono { font-family: monospace; font-size: 13px; letter-spacing: 0.04em; }
 
 .settings-saved {
-  font-size: 11px;
+  font-size: 12px;
   color: #16A34A;
   letter-spacing: 0.04em;
 }
@@ -906,7 +953,7 @@ body {
   outline: none;
   color: var(--text);
   font-family: var(--font-ui);
-  font-size: 12px;
+  font-size: 13px;
   padding: 7px 28px 7px 0;
   min-width: 0;
 }
