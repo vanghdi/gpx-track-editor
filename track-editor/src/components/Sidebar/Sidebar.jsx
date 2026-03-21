@@ -63,7 +63,6 @@ export default function Sidebar() {
           onClick={() => {
             if (confirm('Clear all uploaded tracks and segments?')) {
               clearAll();
-              useTrackStore.temporal.getState().clear();
             }
           }}
         >

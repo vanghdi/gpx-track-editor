@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { temporal } from 'zundo';
 import { areConnected } from '../utils/geoUtils';
 
 // Distinct colours for uploaded tracks — high-contrast on OSM light basemap
@@ -28,9 +27,7 @@ function normaliseSegment(seg) {
   return seg;
 }
 
-const useTrackStore = create(
-  temporal(
-    (set, get) => ({
+const useTrackStore = create((set, get) => ({
   // ── Uploaded tracks ──────────────────────────────────────────────────────────
   uploadedTracks: [],
 
@@ -76,12 +73,21 @@ const useTrackStore = create(
 
   // ── Working track ─────────────────────────────────────────────────────────────
   workingTrack: { name: 'My Track', segments: [] },
+  // Undo/redo history — each entry is a workingTrack snapshot
+  _wt_history: [],
+  _wt_future: [],
 
   setWorkingTrackName: (name) =>
-    set((state) => ({ workingTrack: { ...state.workingTrack, name } })),
+    set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
+      workingTrack: { ...state.workingTrack, name },
+    })),
 
   addSegment: (segment) =>
     set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
       workingTrack: {
         ...state.workingTrack,
         segments: [...state.workingTrack.segments, normaliseSegment({ ...segment, id: crypto.randomUUID() })],
@@ -90,6 +96,8 @@ const useTrackStore = create(
 
   removeSegment: (id) =>
     set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
       workingTrack: {
         ...state.workingTrack,
         segments: state.workingTrack.segments.filter((s) => s.id !== id),
@@ -101,13 +109,19 @@ const useTrackStore = create(
       const segs = [...state.workingTrack.segments];
       const [moved] = segs.splice(fromIndex, 1);
       segs.splice(toIndex, 0, moved);
-      return { workingTrack: { ...state.workingTrack, segments: segs } };
+      return {
+        _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+        _wt_future: [],
+        workingTrack: { ...state.workingTrack, segments: segs },
+      };
     }),
 
   insertSegmentAt: (index, segment) =>
     set((state) => {
       const segs = state.workingTrack.segments;
       return {
+        _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+        _wt_future: [],
         workingTrack: {
           ...state.workingTrack,
           segments: [
@@ -139,6 +153,8 @@ const useTrackStore = create(
       if (points.length < 2) return state;
 
       return {
+        _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+        _wt_future: [],
         workingTrack: {
           ...state.workingTrack,
           segments: state.workingTrack.segments.map((s) =>
@@ -152,6 +168,8 @@ const useTrackStore = create(
 
   updateRoutedSegmentWaypoints: (id, newWaypoints, newPoints) =>
     set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
       workingTrack: {
         ...state.workingTrack,
         segments: state.workingTrack.segments.map((s) =>
@@ -162,6 +180,8 @@ const useTrackStore = create(
 
   replaceSegment: (id, newSegment) =>
     set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
       workingTrack: {
         ...state.workingTrack,
         segments: state.workingTrack.segments.map((s) =>
@@ -235,6 +255,8 @@ const useTrackStore = create(
   // ── Prepend a segment at the start of the working track ──────────────────────
   prependSegment: (segment) =>
     set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
       workingTrack: {
         ...state.workingTrack,
         segments: [normaliseSegment({ ...segment, id: crypto.randomUUID() }), ...state.workingTrack.segments],
@@ -244,6 +266,8 @@ const useTrackStore = create(
   // ── Convert a GPX slice segment to a routed segment in-place ─────────────────
   convertSegmentToRouted: (id, clickLat, clickLng) =>
     set((state) => ({
+      _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+      _wt_future: [],
       workingTrack: {
         ...state.workingTrack,
         segments: state.workingTrack.segments.map((s) => {
@@ -285,12 +309,37 @@ const useTrackStore = create(
     return get().getGapIndices().length === 0;
   },
 
+  // ── Undo / Redo ───────────────────────────────────────────────────────────────
+  undo: () =>
+    set((state) => {
+      if (state._wt_history.length === 0) return state;
+      const prev = state._wt_history[state._wt_history.length - 1];
+      return {
+        _wt_history: state._wt_history.slice(0, -1),
+        _wt_future: [state.workingTrack, ...state._wt_future.slice(0, 29)],
+        workingTrack: prev,
+      };
+    }),
+
+  redo: () =>
+    set((state) => {
+      if (state._wt_future.length === 0) return state;
+      const next = state._wt_future[0];
+      return {
+        _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+        _wt_future: state._wt_future.slice(1),
+        workingTrack: next,
+      };
+    }),
+
   // ── Clear all ─────────────────────────────────────────────────────────────────
   clearAll: () => {
     colorIdx = 0;
     set({
       uploadedTracks: [],
       workingTrack: { name: 'My Track', segments: [] },
+      _wt_history: [],
+      _wt_future: [],
       selectionMode: null,
       selectionStart: null,
       locationMarkers: [],
@@ -298,15 +347,6 @@ const useTrackStore = create(
       poiMarkers: [],
     });
   },
-    }),
-    {
-      // Only snapshot the working track — exclude uploaded tracks, map state, markers, settings
-      partialize: (state) => ({ workingTrack: state.workingTrack }),
-      // Skip snapshot if workingTrack reference is unchanged (selectionMode changes, etc.)
-      equality: (a, b) => a.workingTrack === b.workingTrack,
-      limit: 30,
-    }
-  )
-);
+}));
 
 export default useTrackStore;
