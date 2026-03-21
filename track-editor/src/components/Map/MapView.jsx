@@ -5,6 +5,7 @@ import TrackLayer from './TrackLayer';
 import WorkingTrackLayer from './WorkingTrackLayer';
 import PointSelector from './PointSelector';
 import LocationMarkerLayer from './LocationMarkerLayer';
+import PoiMarkerLayer from './PoiMarkerLayer';
 import MapSearchOverlay, { MapSearchCenterer } from './MapSearchOverlay';
 import useTrackStore from '../../store/trackStore';
 import { getBBox } from '../../utils/geoUtils';
@@ -130,6 +131,7 @@ export default function MapView() {
         <WorkingTrackLayer />
         <PointSelector />
         <LocationMarkerLayer />
+        <PoiMarkerLayer />
         <MapFitter />
         <GeolocationInit />
         <SelectionCursor />

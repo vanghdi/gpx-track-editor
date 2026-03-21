@@ -189,6 +189,11 @@ const useTrackStore = create((set, get) => ({
 
   clearLocationMarkers: () => set({ locationMarkers: [] }),
 
+  // ── POI markers (Overpass API results — amber pins) ───────────────────────────
+  poiMarkers: [],
+  addPoiMarkers: (markers) => set({ poiMarkers: markers }),
+  clearPoiMarkers: () => set({ poiMarkers: [] }),
+
   // ── Preview marker (hover over search result — transient) ─────────────────────
   previewMarker: null,
   setPreviewMarker: (marker) => set({ previewMarker: marker }),
@@ -287,6 +292,7 @@ const useTrackStore = create((set, get) => ({
       selectionStart: null,
       locationMarkers: [],
       previewMarker: null,
+      poiMarkers: [],
     });
   },
 }));
