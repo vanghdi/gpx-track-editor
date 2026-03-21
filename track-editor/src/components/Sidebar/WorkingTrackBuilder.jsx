@@ -55,6 +55,11 @@ export default function WorkingTrackBuilder() {
     if (fromIdx !== -1 && toIdx !== -1) reorderSegments(fromIdx, toIdx);
   };
 
+  const firstIsRouted = segments.length > 0 && segments[0].type === 'routed';
+  const lastIsRouted  = segments.length > 0 && segments[segments.length - 1].type === 'routed';
+  const showStartPhantom = hasSegments && !firstIsRouted;
+  const showEndPhantom   = hasSegments && !lastIsRouted;
+
   return (
     <div className="section">
       <div className="section__header">
@@ -87,9 +92,19 @@ export default function WorkingTrackBuilder() {
       </div>
 
       <div className="segments-list">
-        {!hasSegments ? (
-          <p className="empty-hint">No segments yet. Click 'Add Segment' to start.</p>
-        ) : (
+        {showStartPhantom && (
+          <button
+            className="phantom-segment phantom-segment--start"
+            onClick={startFreeStartPicking}
+            disabled={!!selectionMode}
+            title="Route from a free start point to the beginning of this track"
+          >
+            <span className="phantom-segment__icon">↑</span>
+            <span>Navigate to route start</span>
+          </button>
+        )}
+
+        {hasSegments ? (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={segments.map((s) => s.id)} strategy={verticalListSortingStrategy}>
               {segments.map((seg, i) => (
@@ -103,6 +118,20 @@ export default function WorkingTrackBuilder() {
               ))}
             </SortableContext>
           </DndContext>
+        ) : (
+          !showStartPhantom && <p className="empty-hint">No segments yet. Click 'Add Segment' to start.</p>
+        )}
+
+        {showEndPhantom && (
+          <button
+            className="phantom-segment phantom-segment--end"
+            onClick={startFreeEndPicking}
+            disabled={!!selectionMode}
+            title="Route from the end of this track to a free end point"
+          >
+            <span className="phantom-segment__icon">↓</span>
+            <span>Navigate from route end</span>
+          </button>
         )}
       </div>
 
@@ -117,30 +146,12 @@ export default function WorkingTrackBuilder() {
         </div>
       ) : (
         <div className="segment-actions">
-          {hasSegments && (
-            <button
-              className="btn btn--ghost btn--sm"
-              title="Route from a free start point to the beginning of this track"
-              onClick={startFreeStartPicking}
-            >
-              ← Start
-            </button>
-          )}
           <button
             className="btn btn--primary btn--flex"
             onClick={startSegmentPicking}
           >
             + Add Segment
           </button>
-          {hasSegments && (
-            <button
-              className="btn btn--ghost btn--sm"
-              title="Route from the end of this track to a free end point"
-              onClick={startFreeEndPicking}
-            >
-              End →
-            </button>
-          )}
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import useTrackStore from '../../store/trackStore';
 import UploadZone from './UploadZone';
 import UploadedTrackItem from './UploadedTrackItem';
@@ -8,6 +9,7 @@ import ApiKeySettings from './ApiKeySettings';
 export default function Sidebar() {
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const clearAll = useTrackStore((s) => s.clearAll);
+  const [tracksOpen, setTracksOpen] = useState(true);
 
   return (
     <aside className="sidebar">
@@ -29,16 +31,35 @@ export default function Sidebar() {
         <ApiKeySettings />
 
         <div className="section">
-          <div className="section__header">
-            <h3 className="section__title">Upload Tracks</h3>
-          </div>
-          <UploadZone />
-          {uploadedTracks.length > 0 && (
-            <div className="track-list">
-              {uploadedTracks.map((track) => (
-                <UploadedTrackItem key={track.id} track={track} />
-              ))}
-            </div>
+          <button
+            className="settings-toggle"
+            onClick={() => setTracksOpen((o) => !o)}
+            aria-expanded={tracksOpen}
+          >
+            <span>
+              Upload Tracks
+              {uploadedTracks.length > 0 && (
+                <span style={{ marginLeft: 6, color: 'var(--text-dim)', fontSize: 10 }}>
+                  ({uploadedTracks.length})
+                </span>
+              )}
+            </span>
+            <span className="settings-toggle__chevron">{tracksOpen ? '▲' : '▼'}</span>
+          </button>
+
+          {tracksOpen && (
+            <>
+              <div style={{ padding: '6px 12px 4px' }}>
+                <UploadZone />
+              </div>
+              {uploadedTracks.length > 0 && (
+                <div className="track-list">
+                  {uploadedTracks.map((track) => (
+                    <UploadedTrackItem key={track.id} track={track} />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 

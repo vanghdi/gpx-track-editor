@@ -864,7 +864,7 @@ body {
   top: 12px;
   right: 12px;
   z-index: 1000;
-  width: 240px;
+  width: 320px;
   pointer-events: auto;
 }
 
@@ -1213,4 +1213,40 @@ body {
 .poi-clear-btn:hover {
   color: var(--coral);
   border-color: var(--coral);
+}
+
+/* ─── Phantom Segments (navigate-to-start / route-from-end) ─────── */
+.phantom-segment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  background: rgba(217, 137, 67, 0.07);
+  border: 1px dashed rgba(217, 137, 67, 0.35);
+  border-radius: var(--r-sm);
+  color: var(--amber);
+  font-size: 11px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  margin-bottom: 3px;
+}
+.phantom-segment:hover:not(:disabled) {
+  background: rgba(217, 137, 67, 0.15);
+  border-color: rgba(217, 137, 67, 0.65);
+}
+.phantom-segment:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.phantom-segment--end {
+  margin-top: 3px;
+  margin-bottom: 0;
+}
+.phantom-segment__icon {
+  font-size: 13px;
+  opacity: 0.85;
+  flex-shrink: 0;
 }
