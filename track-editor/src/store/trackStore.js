@@ -189,6 +189,10 @@ const useTrackStore = create((set, get) => ({
 
   clearLocationMarkers: () => set({ locationMarkers: [] }),
 
+  // ── Preview marker (hover over search result — transient) ─────────────────────
+  previewMarker: null,
+  setPreviewMarker: (marker) => set({ previewMarker: marker }),
+
   // ── API key (persisted in localStorage) ──────────────────────────────────────
   apiKey: localStorage.getItem('ors_api_key') || '',
   setApiKey: (key) => {
@@ -282,6 +286,7 @@ const useTrackStore = create((set, get) => ({
       selectionMode: null,
       selectionStart: null,
       locationMarkers: [],
+      previewMarker: null,
     });
   },
 }));

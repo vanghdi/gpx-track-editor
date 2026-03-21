@@ -5,6 +5,7 @@ import TrackLayer from './TrackLayer';
 import WorkingTrackLayer from './WorkingTrackLayer';
 import PointSelector from './PointSelector';
 import LocationMarkerLayer from './LocationMarkerLayer';
+import MapSearchOverlay, { MapSearchCenterer } from './MapSearchOverlay';
 import useTrackStore from '../../store/trackStore';
 import { getBBox } from '../../utils/geoUtils';
 
@@ -114,6 +115,7 @@ function GeolocationInit() {
 export default function MapView() {
   const [activeLayer, setActiveLayer] = useState('osm');
   const layer = LAYERS[activeLayer];
+  const mapRef = useRef(null); // shared between MapSearchCenterer (inside) and MapSearchOverlay (outside)
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
@@ -132,7 +134,10 @@ export default function MapView() {
         <GeolocationInit />
         <SelectionCursor />
         <MapViewTracker />
+        <MapSearchCenterer mapRef={mapRef} />
       </MapContainer>
+
+      <MapSearchOverlay mapRef={mapRef} />
 
       <MapControls
         activeLayer={activeLayer}
