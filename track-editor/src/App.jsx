@@ -1,12 +1,15 @@
 import { useEffect } from 'react';
 import Sidebar from './components/Sidebar/Sidebar';
 import MapView from './components/Map/MapView';
+import MobilePanel from './components/Mobile/MobilePanel';
 import useTrackStore from './store/trackStore';
+import { useIsMobile } from './hooks/useIsMobile';
 
 export default function App() {
   const startSegmentPicking = useTrackStore((s) => s.startSegmentPicking);
   const selectionMode = useTrackStore((s) => s.selectionMode);
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const onKey = (e) => {
@@ -24,10 +27,11 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      <Sidebar />
+      {!isMobile && <Sidebar />}
       <main className="map-container">
         <MapView />
       </main>
+      {isMobile && <MobilePanel />}
     </div>
   );
 }
