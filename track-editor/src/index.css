@@ -1028,7 +1028,6 @@ body {
 .map-search-overlay--expanded {
   width: min(320px, calc(100vw - 24px));
 }
-
 /* Compact icon button — matches chrome button style */
 .map-search-compact-btn {
   width: 42px;
@@ -2224,11 +2223,9 @@ body {
     font-size: 14px;
   }
 
-  /* ─── Map search overlay: shrink to fit mobile width ───────── */
+  /* ─── Map search overlay: keep below redo button on mobile ──── */
   .map-search-overlay {
-    width: calc(100vw - 24px);
-    max-width: 380px;
-    top: 10px;
+    top: 58px;
     right: 12px;
   }
 
@@ -2254,11 +2251,6 @@ body {
 /* ─── Very small screens (≤ 390px, iPhone SE / mini) ─────────── */
 @media (max-width: 390px) {
   .mobile-panel--peek { height: 52vh; }
-  .map-search-overlay {
-    width: calc(100vw - 16px);
-    right: 8px;
-    top: 8px;
-  }
 }
 
 
