@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useTrackStore from '../../store/trackStore';
+import { exportGPX } from '../../utils/gpxExporter';
 import { getRoute } from '../../utils/routingService';
 import { pathDistanceKm } from '../../utils/geoUtils';
 
@@ -122,20 +123,34 @@ function PhantomPill({ position, onClick, disabled }) {
  */
 export default function TrackBar() {
   const segments = useTrackStore((s) => s.workingTrack.segments);
+  const workingTrack = useTrackStore((s) => s.workingTrack);
   const selectionMode = useTrackStore((s) => s.selectionMode);
   const startSegmentPicking = useTrackStore((s) => s.startSegmentPicking);
   const startFreeStartPicking = useTrackStore((s) => s.startFreeStartPicking);
   const startFreeEndPicking = useTrackStore((s) => s.startFreeEndPicking);
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
   const getGapIndices = useTrackStore((s) => s.getGapIndices);
+  const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
 
   const gapIndices = new Set(getGapIndices());
   const hasSegments = segments.length > 0;
+  const downloadReady = isDownloadReady();
 
   const firstIsRouted = hasSegments && segments[0].type === 'routed';
   const lastIsRouted  = hasSegments && segments[segments.length - 1].type === 'routed';
   const showStartPhantom = hasSegments && !firstIsRouted;
   const showEndPhantom   = hasSegments && !lastIsRouted;
+
+  const handleDownload = () => {
+    const xml = exportGPX(workingTrack.name, workingTrack.segments);
+    const blob = new Blob([xml], { type: 'application/gpx+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${workingTrack.name.replace(/\s+/g, '_') || 'track'}.gpx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // ── Picking mode — bar shows status + cancel ──────────────────
   if (selectionMode) {
@@ -157,16 +172,6 @@ export default function TrackBar() {
   // ── Normal bar ────────────────────────────────────────────────
   return (
     <div className="track-bar">
-      {/* Add segment button */}
-      <button
-        className="track-bar__add"
-        onClick={startSegmentPicking}
-        title="Add segment"
-        aria-label="Add segment"
-      >
-        <span>+</span>
-      </button>
-
       {/* Scrollable segment track */}
       {hasSegments ? (
         <div className="track-bar__scroll">
@@ -198,6 +203,27 @@ export default function TrackBar() {
       ) : (
         <span className="track-bar__hint">Add a segment to start building your track</span>
       )}
+
+      {/* Add segment button — right side */}
+      <button
+        className="track-bar__add"
+        onClick={startSegmentPicking}
+        title="Add segment"
+        aria-label="Add segment"
+      >
+        <span>+</span>
+      </button>
+
+      {/* Download button — far right */}
+      <button
+        className={`track-bar__download${downloadReady ? ' track-bar__download--ready' : ''}`}
+        onClick={handleDownload}
+        disabled={!downloadReady}
+        title={downloadReady ? 'Download GPX' : 'Connect all segments to enable download'}
+        aria-label="Download GPX"
+      >
+        ⬇
+      </button>
     </div>
   );
 }

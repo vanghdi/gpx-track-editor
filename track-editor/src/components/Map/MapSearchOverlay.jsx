@@ -26,8 +26,7 @@ export default function MapSearchOverlay({ mapRef }) {
   const addPoiMarkers        = useTrackStore((s) => s.addPoiMarkers);
   const clearPoiMarkers      = useTrackStore((s) => s.clearPoiMarkers);
 
-  // ── Compact/expand state ───────────────────────────────────────────────────────
-  const [expanded,     setExpanded]     = useState(false);
+  // ── Compact/expand state — removed; search is always visible ─────────────────
 
   // ── Location search state ──────────────────────────────────────────────────────
   const [query,        setQuery]        = useState('');
@@ -49,23 +48,6 @@ export default function MapSearchOverlay({ mapRef }) {
   const poiAbortRef = useRef(null);
   const inputRef    = useRef(null);
   const overlayRef  = useRef(null);
-
-  // ── Expand on click ────────────────────────────────────────────────────────────
-  const handleExpand = () => {
-    setExpanded(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
-
-  // ── Collapse (clear query and close everything) ────────────────────────────────
-  const handleCollapse = useCallback(() => {
-    setExpanded(false);
-    setQuery('');
-    setResults([]);
-    setOpen(false);
-    setShowPinPanel(false);
-    setPanelExpanded(false);
-    setPreviewMarker(null);
-  }, [setPreviewMarker]);
 
   // ── Location search handlers ───────────────────────────────────────────────────
   const runSearch = useCallback(async (q) => {
@@ -185,20 +167,18 @@ export default function MapSearchOverlay({ mapRef }) {
     }
   };
 
-  // ── Outside click: collapse ────────────────────────────────────────────────────
+  // ── Outside click: close dropdowns only (no collapse) ────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (!overlayRef.current?.contains(e.target)) {
         setOpen(false);
         setShowPinPanel(false);
         setPreviewMarker(null);
-        // Collapse completely if nothing is in the query
-        if (!query) setExpanded(false);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [setPreviewMarker, query]);
+  }, [setPreviewMarker]);
 
   // ── Abort on unmount ───────────────────────────────────────────────────────────
   useEffect(() => () => {
@@ -208,37 +188,11 @@ export default function MapSearchOverlay({ mapRef }) {
 
   const shortLabel = (label) => label.split(',').slice(0, 3).join(',').trim();
 
-  // ── Compact (icon-only) state ──────────────────────────────────────────────────
-  if (!expanded) {
-    return (
-      <div
-        ref={overlayRef}
-        className="map-search-overlay map-search-overlay--compact"
-        role="search"
-      >
-        <button
-          className="map-search-compact-btn"
-          onClick={handleExpand}
-          title="Search location"
-          aria-label="Open search"
-        >
-          🔍
-          {locationMarkers.length > 0 && (
-            <span className="map-search-badge">{locationMarkers.length}</span>
-          )}
-          {poiMarkers.length > 0 && (
-            <span className="map-search-badge map-search-badge--poi">{poiMarkers.length}</span>
-          )}
-        </button>
-      </div>
-    );
-  }
-
-  // ── Expanded state ─────────────────────────────────────────────────────────────
+  // ── Always expanded ────────────────────────────────────────────────────────────
   return (
     <div
       ref={overlayRef}
-      className="map-search-overlay map-search-overlay--expanded"
+      className="map-search-overlay"
       role="search"
     >
       {/* ── Search row ── */}
@@ -277,16 +231,6 @@ export default function MapSearchOverlay({ mapRef }) {
           onClick={() => { setPanelExpanded((v) => !v); setPoiError(null); }}
         >
           {panelExpanded ? '⌃' : '⌄'}
-        </button>
-
-        {/* Collapse button */}
-        <button
-          className="map-search-pins-btn"
-          title="Close search"
-          onClick={handleCollapse}
-          aria-label="Close search"
-        >
-          ✕
         </button>
       </div>
 
