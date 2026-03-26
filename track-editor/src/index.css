@@ -1529,21 +1529,33 @@ body {
 /* Total distance badge — appears below redo button in the chrome actions column */
 .map-chrome__total {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 42px;
-  padding: 5px 4px;
+  padding: 6px 4px;
   background: var(--surface-2);
   border: 1px solid var(--border-bright);
   border-radius: var(--r-md);
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--teal-light);
-  letter-spacing: 0.03em;
-  text-align: center;
-  white-space: nowrap;
+  line-height: 1.1;
+  gap: 1px;
+}
+.map-chrome__total-value {
   font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.map-chrome__total-unit {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--teal-light);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .drawer-backdrop {

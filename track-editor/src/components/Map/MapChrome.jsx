@@ -5,7 +5,8 @@ import { pathDistanceKm } from '../../utils/geoUtils';
 import SettingsDrawer from './SettingsDrawer';
 
 function formatDist(km) {
-  return km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(2)} km`;
+  if (km < 1) return { value: (km * 1000).toFixed(0), unit: 'm' };
+  return { value: km.toFixed(2), unit: 'km' };
 }
 
 /**
@@ -63,11 +64,15 @@ export default function MapChrome({ activeLayer, onToggleLayer }) {
         >
           ↪
         </button>
-        {segments.length > 0 && (
-          <span className="map-chrome__total" title="Total track length">
-            {formatDist(totalKm)}
-          </span>
-        )}
+        {segments.length > 0 && (() => {
+          const { value, unit } = formatDist(totalKm);
+          return (
+            <span className="map-chrome__total" title="Total track length">
+              <span className="map-chrome__total-value">{value}</span>
+              <span className="map-chrome__total-unit">{unit}</span>
+            </span>
+          );
+        })()}
       </div>
 
       <SettingsDrawer
