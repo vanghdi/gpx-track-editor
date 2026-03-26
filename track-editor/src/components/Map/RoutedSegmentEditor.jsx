@@ -16,17 +16,21 @@ const HALO_WEIGHT = 12;
 function makeWaypointIcon(isEndpoint) {
   const bg = isEndpoint ? '#D98943' : '#ffffff';
   const border = '#D98943';
-  const size = isEndpoint ? 14 : 12;
+  const dot = isEndpoint ? 14 : 12;
+  // 44×44 transparent hit area with dot centered — meets mobile touch target guidelines
   return L.divIcon({
     className: '',
     html: `<div style="
-      width:${size}px;height:${size}px;border-radius:50%;
+      width:44px;height:44px;
+      display:flex;align-items:center;justify-content:center;
+    "><div style="
+      width:${dot}px;height:${dot}px;border-radius:50%;
       background:${bg};border:2.5px solid ${border};
       box-shadow:0 2px 8px rgba(0,0,0,0.4);
       cursor:grab;
-    "></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    "></div></div>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   });
 }
 
@@ -125,6 +129,12 @@ function RoutedSegmentItem({ seg, segNumber }) {
       >
         <Tooltip sticky>#{segNumber} Routed link</Tooltip>
       </Polyline>
+      {/* Invisible wide tap-target layer — makes it much easier to tap the line on mobile */}
+      <Polyline
+        positions={positions}
+        pathOptions={{ color: 'transparent', weight: 28, opacity: 0 }}
+        eventHandlers={{ click: handlePolylineClick }}
+      />
       {waypoints.map((wp, idx) => (
         <Marker
           key={idx}
