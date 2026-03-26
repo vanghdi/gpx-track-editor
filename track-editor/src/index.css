@@ -66,6 +66,9 @@
   --text:         #261a08;
   --text-muted:   rgba(38, 26, 8, 0.62);
   --text-dim:     rgba(38, 26, 8, 0.42);
+
+  /* Teal: darken for readability on warm parchment */
+  --teal-light:   #1e727c;
 }
 
 /* Light-mode sidebar texture: warm sepia grid instead of teal */
