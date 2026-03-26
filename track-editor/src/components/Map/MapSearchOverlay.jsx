@@ -26,6 +26,9 @@ export default function MapSearchOverlay({ mapRef }) {
   const addPoiMarkers        = useTrackStore((s) => s.addPoiMarkers);
   const clearPoiMarkers      = useTrackStore((s) => s.clearPoiMarkers);
 
+  // ── Compact/expand state ───────────────────────────────────────────────────────
+  const [expanded,     setExpanded]     = useState(false);
+
   // ── Location search state ──────────────────────────────────────────────────────
   const [query,        setQuery]        = useState('');
   const [results,      setResults]      = useState([]);
@@ -45,6 +48,24 @@ export default function MapSearchOverlay({ mapRef }) {
   const abortRef    = useRef(null);
   const poiAbortRef = useRef(null);
   const inputRef    = useRef(null);
+  const overlayRef  = useRef(null);
+
+  // ── Expand on click ────────────────────────────────────────────────────────────
+  const handleExpand = () => {
+    setExpanded(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  // ── Collapse (clear query and close everything) ────────────────────────────────
+  const handleCollapse = useCallback(() => {
+    setExpanded(false);
+    setQuery('');
+    setResults([]);
+    setOpen(false);
+    setShowPinPanel(false);
+    setPanelExpanded(false);
+    setPreviewMarker(null);
+  }, [setPreviewMarker]);
 
   // ── Location search handlers ───────────────────────────────────────────────────
   const runSearch = useCallback(async (q) => {
@@ -164,18 +185,20 @@ export default function MapSearchOverlay({ mapRef }) {
     }
   };
 
-  // ── Outside click: close dropdowns ────────────────────────────────────────────
+  // ── Outside click: collapse ────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
-      if (!e.target.closest('.map-search-overlay')) {
+      if (!overlayRef.current?.contains(e.target)) {
         setOpen(false);
         setShowPinPanel(false);
         setPreviewMarker(null);
+        // Collapse completely if nothing is in the query
+        if (!query) setExpanded(false);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [setPreviewMarker]);
+  }, [setPreviewMarker, query]);
 
   // ── Abort on unmount ───────────────────────────────────────────────────────────
   useEffect(() => () => {
@@ -185,8 +208,39 @@ export default function MapSearchOverlay({ mapRef }) {
 
   const shortLabel = (label) => label.split(',').slice(0, 3).join(',').trim();
 
+  // ── Compact (icon-only) state ──────────────────────────────────────────────────
+  if (!expanded) {
+    return (
+      <div
+        ref={overlayRef}
+        className="map-search-overlay map-search-overlay--compact"
+        role="search"
+      >
+        <button
+          className="map-search-compact-btn"
+          onClick={handleExpand}
+          title="Search location"
+          aria-label="Open search"
+        >
+          🔍
+          {locationMarkers.length > 0 && (
+            <span className="map-search-badge">{locationMarkers.length}</span>
+          )}
+          {poiMarkers.length > 0 && (
+            <span className="map-search-badge map-search-badge--poi">{poiMarkers.length}</span>
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  // ── Expanded state ─────────────────────────────────────────────────────────────
   return (
-    <div className="map-search-overlay">
+    <div
+      ref={overlayRef}
+      className="map-search-overlay map-search-overlay--expanded"
+      role="search"
+    >
       {/* ── Search row ── */}
       <div className="map-search-row">
         <div className="map-search-input-wrap">
@@ -223,6 +277,16 @@ export default function MapSearchOverlay({ mapRef }) {
           onClick={() => { setPanelExpanded((v) => !v); setPoiError(null); }}
         >
           {panelExpanded ? '⌃' : '⌄'}
+        </button>
+
+        {/* Collapse button */}
+        <button
+          className="map-search-pins-btn"
+          title="Close search"
+          onClick={handleCollapse}
+          aria-label="Close search"
+        >
+          ✕
         </button>
       </div>
 

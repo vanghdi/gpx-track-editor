@@ -1014,11 +1014,56 @@ body {
 /* ─── Map Search Overlay ─────────────────────────────────────── */
 .map-search-overlay {
   position: absolute;
-  top: 58px;
+  top: 12px;
   right: 12px;
   z-index: 1000;
-  width: 320px;
   pointer-events: auto;
+  /* Animate width transition between compact and expanded */
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Compact: just the icon button */
+.map-search-overlay--compact {
+  width: 42px;
+}
+
+/* Expanded: full search UI */
+.map-search-overlay--expanded {
+  width: 320px;
+}
+
+/* Compact icon button */
+.map-search-compact-btn {
+  width: 42px;
+  height: 42px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+}
+.map-search-compact-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--teal);
+}
+
+/* Position the action buttons so search can sit next to them */
+/* When compact, search icon aligns with the action buttons row */
+/* When expanded, it drops below the action buttons */
+.map-search-overlay--compact {
+  top: 12px;
+  right: 62px; /* leave room for the 42px + 6px gap action buttons group */
+}
+.map-search-overlay--expanded {
+  top: 58px;
+  right: 12px;
 }
 
 .map-search-row {
