@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import useTrackStore from '../../store/trackStore';
 import { useTheme } from '../../hooks/useTheme';
 import { parseGPX } from '../../utils/gpxParser';
+import { exportGPX } from '../../utils/gpxExporter';
 import ApiKeySettings from '../Sidebar/ApiKeySettings';
 import FolderTree from '../Sidebar/FolderTree';
 import FolderPicker from '../Sidebar/FolderPicker';
@@ -15,10 +16,12 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const addUploadedTrack = useTrackStore((s) => s.addUploadedTrack);
   const clearAll = useTrackStore((s) => s.clearAll);
+  const workingTrack = useTrackStore((s) => s.workingTrack);
   const workingTrackName = useTrackStore((s) => s.workingTrack.name);
   const setWorkingTrackName = useTrackStore((s) => s.setWorkingTrackName);
   const routingProfile = useTrackStore((s) => s.routingProfile);
   const setRoutingProfile = useTrackStore((s) => s.setRoutingProfile);
+  const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
   const { theme, toggle: toggleTheme } = useTheme();
 
   const [tracksOpen, setTracksOpen] = useState(false);
@@ -64,6 +67,18 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
     if (!mapView) return;
     const { lat, lng, zoom } = mapView;
     window.open(`https://www.google.com/maps/@${lat},${lng},${zoom}z`, '_blank', 'noopener');
+  };
+
+  const downloadReady = isDownloadReady();
+  const handleDownload = () => {
+    const xml = exportGPX(workingTrack.name, workingTrack.segments);
+    const blob = new Blob([xml], { type: 'application/gpx+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(workingTrack.name || 'track').replace(/\s+/g, '_')}.gpx`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -215,6 +230,18 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
 
           {/* API Key */}
           <ApiKeySettings />
+
+          {/* Download */}
+          <div className="drawer-section">
+            <button
+              className={`btn btn--sm btn--full drawer-download${downloadReady ? ' drawer-download--ready' : ''}`}
+              onClick={handleDownload}
+              disabled={!downloadReady}
+              title={downloadReady ? 'Download GPX track' : 'Connect all segments to enable download'}
+            >
+              ⬇ Download GPX
+            </button>
+          </div>
 
           {/* Danger zone */}
           <div className="drawer-section">

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import useTrackStore from '../../store/trackStore';
-import { exportGPX } from '../../utils/gpxExporter';
 import { getRoute } from '../../utils/routingService';
 import { pathDistanceKm } from '../../utils/geoUtils';
 
@@ -121,14 +120,12 @@ function PhantomPill({ position, onClick, disabled }) {
 /** Horizontal track editor bar pinned to the bottom of the map. */
 export default function TrackBar() {
   const segments = useTrackStore((s) => s.workingTrack.segments);
-  const workingTrack = useTrackStore((s) => s.workingTrack);
   const selectionMode = useTrackStore((s) => s.selectionMode);
   const startSegmentPicking = useTrackStore((s) => s.startSegmentPicking);
   const startFreeStartPicking = useTrackStore((s) => s.startFreeStartPicking);
   const startFreeEndPicking = useTrackStore((s) => s.startFreeEndPicking);
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
   const getGapIndices = useTrackStore((s) => s.getGapIndices);
-  const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
   const reorderSegments = useTrackStore((s) => s.reorderSegments);
 
   const [reorderMode, setReorderMode] = useState(false);
@@ -136,24 +133,11 @@ export default function TrackBar() {
 
   const gapIndices = new Set(getGapIndices());
   const hasSegments = segments.length > 0;
-  const downloadReady = isDownloadReady();
-  const totalKm = segments.reduce((sum, s) => sum + pathDistanceKm(s.points || []), 0);
 
   const firstIsRouted = hasSegments && segments[0].type === 'routed';
   const lastIsRouted  = hasSegments && segments[segments.length - 1].type === 'routed';
   const showStartPhantom = hasSegments && !firstIsRouted && !reorderMode;
   const showEndPhantom   = hasSegments && !lastIsRouted  && !reorderMode;
-
-  const handleDownload = () => {
-    const xml = exportGPX(workingTrack.name, workingTrack.segments);
-    const blob = new Blob([xml], { type: 'application/gpx+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${workingTrack.name.replace(/\s+/g, '_') || 'track'}.gpx`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   const handleReorderToggle = () => {
     setReorderMode((v) => !v);
@@ -244,13 +228,6 @@ export default function TrackBar() {
         </button>
       )}
 
-      {/* Total distance */}
-      {hasSegments && (
-        <span className="track-bar__total" title="Total track length">
-          {formatDist(totalKm)}
-        </span>
-      )}
-
       {/* Reorder toggle — only shown when 2+ segments */}
       {segments.length >= 2 && (
         <button
@@ -263,27 +240,16 @@ export default function TrackBar() {
         </button>
       )}
 
-      {/* Add + Download — hidden in reorder mode */}
+      {/* Add segment — hidden in reorder mode */}
       {!reorderMode && (
-        <>
-          <button
-            className="track-bar__add"
-            onClick={startSegmentPicking}
-            title="Add segment"
-            aria-label="Add segment"
-          >
-            <span>+</span>
-          </button>
-          <button
-            className={`track-bar__download${downloadReady ? ' track-bar__download--ready' : ''}`}
-            onClick={handleDownload}
-            disabled={!downloadReady}
-            title={downloadReady ? 'Download GPX' : 'Connect all segments to enable download'}
-            aria-label="Download GPX"
-          >
-            ⬇
-          </button>
-        </>
+        <button
+          className="track-bar__add"
+          onClick={startSegmentPicking}
+          title="Add segment"
+          aria-label="Add segment"
+        >
+          <span>+</span>
+        </button>
       )}
     </div>
   );

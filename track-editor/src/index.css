@@ -1526,10 +1526,25 @@ body {
   color: #fff;
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   SETTINGS DRAWER  — Slide-in from left
-   ═══════════════════════════════════════════════════════════════ */
+/* Total distance badge — appears below redo button in the chrome actions column */
+.map-chrome__total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  padding: 5px 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-md);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--teal-light);
+  letter-spacing: 0.03em;
+  text-align: center;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
 
 .drawer-backdrop {
   position: fixed;
@@ -1621,6 +1636,34 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .drawer-section:last-child { border-bottom: none; }
+
+/* Download GPX button in the settings drawer */
+.drawer-download {
+  background: var(--surface-3);
+  border: 1.5px solid var(--border-bright);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+  border-radius: var(--r-md);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 10px 16px;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.drawer-download--ready {
+  opacity: 1;
+  cursor: pointer;
+  color: var(--teal-light);
+  border-color: var(--teal);
+}
+.drawer-download--ready:hover {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+}
 
 .drawer-section--row {
   display: flex;
@@ -1781,34 +1824,6 @@ body {
 }
 
 /* Download button — far right */
-.track-bar__download {
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  margin: 0 6px 0 2px;
-  background: var(--surface-3);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--r-md);
-  color: var(--text-dim);
-  font-size: 15px;
-  cursor: not-allowed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  opacity: 0.45;
-}
-.track-bar__download--ready {
-  color: var(--teal-light);
-  border-color: var(--teal);
-  opacity: 1;
-  cursor: pointer;
-}
-.track-bar__download--ready:hover {
-  background: var(--teal);
-  color: #fff;
-}
-
 /* Hint text when empty */
 .track-bar__hint {
   font-family: var(--font-ui);
@@ -1938,18 +1953,6 @@ body {
 }
 .track-bar__pill-remove:hover { color: var(--coral); background: var(--coral-dim); }
 .track-bar__pill--routed .track-bar__pill-remove:hover { color: var(--amber); background: var(--amber-dim); }
-
-/* Total distance label */
-.track-bar__total {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
-  flex-shrink: 0;
-  padding: 0 4px;
-  letter-spacing: 0.02em;
-}
 
 /* Reorder mode toggle button */
 .track-bar__reorder-toggle {

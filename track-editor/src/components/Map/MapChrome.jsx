@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import useTrackStore from '../../store/trackStore';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
+import { pathDistanceKm } from '../../utils/geoUtils';
 import SettingsDrawer from './SettingsDrawer';
+
+function formatDist(km) {
+  return km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(2)} km`;
+}
 
 /**
  * Fixed top-left chrome overlay:
@@ -13,6 +18,9 @@ export default function MapChrome({ activeLayer, onToggleLayer }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { canUndo, canRedo, undo, redo } = useUndoRedo();
   const mapView = useTrackStore((s) => s.mapView);
+  const segments = useTrackStore((s) => s.workingTrack.segments);
+
+  const totalKm = segments.reduce((sum, s) => sum + pathDistanceKm(s.points || []), 0);
 
   // Close drawer on Escape
   useEffect(() => {
@@ -55,6 +63,11 @@ export default function MapChrome({ activeLayer, onToggleLayer }) {
         >
           ↪
         </button>
+        {segments.length > 0 && (
+          <span className="map-chrome__total" title="Total track length">
+            {formatDist(totalKm)}
+          </span>
+        )}
       </div>
 
       <SettingsDrawer
