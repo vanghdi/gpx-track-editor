@@ -89,12 +89,23 @@ function TrackRow({ track }) {
 
 /** Recursive folder node */
 function FolderNode({ folder, depth = 0, allFolders, allTracks }) {
-  const { renameFolder, deleteFolder, addFolder, toggleFolderCollapsed } = useTrackStore();
+  const { renameFolder, deleteFolder, addFolder, toggleFolderCollapsed, toggleFolderVisibility } = useTrackStore();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(folder.name);
 
   const children = allFolders.filter((f) => f.parentId === folder.id);
   const tracks = allTracks.filter((t) => t.folderId === folder.id);
+
+  // Collect all descendant track ids (including nested folders) to derive visibility state
+  const getAllDescendantTracks = (folderId) => {
+    const result = allTracks.filter((t) => t.folderId === folderId);
+    allFolders.filter((f) => f.parentId === folderId).forEach((child) => {
+      result.push(...getAllDescendantTracks(child.id));
+    });
+    return result;
+  };
+  const allDescendantTracks = getAllDescendantTracks(folder.id);
+  const allVisible = allDescendantTracks.length > 0 && allDescendantTracks.every((t) => t.visible);
 
   const commitRename = () => {
     if (draft.trim()) renameFolder(folder.id, draft.trim());
@@ -129,6 +140,13 @@ function FolderNode({ folder, depth = 0, allFolders, allTracks }) {
         )}
 
         <div className="folder-node-actions">
+          <button
+            className="folder-icon-btn"
+            title={allVisible ? 'Hide all in folder' : 'Show all in folder'}
+            onClick={() => toggleFolderVisibility(folder.id)}
+          >
+            {allVisible ? '👁' : '🙈'}
+          </button>
           <button className="folder-icon-btn" title="Add subfolder" onClick={() => addFolder('New folder', folder.id)}>
             +📁
           </button>

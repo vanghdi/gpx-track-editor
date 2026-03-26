@@ -104,7 +104,7 @@ const useTrackStore = create(
           name,
           color: nextColor(),
           points,
-          visible: true,
+          visible: false,
           folderId: folderId ?? null,
         },
       ],
@@ -135,6 +135,30 @@ const useTrackStore = create(
         t.id === id ? { ...t, visible: !t.visible } : t
       ),
     })),
+
+  toggleFolderVisibility: (folderId) =>
+    set((state) => {
+      // Collect folder id + all descendant folder ids
+      const ids = new Set([folderId]);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        state.folders.forEach((f) => {
+          if (f.parentId && ids.has(f.parentId) && !ids.has(f.id)) {
+            ids.add(f.id);
+            changed = true;
+          }
+        });
+      }
+      const affected = state.uploadedTracks.filter((t) => ids.has(t.folderId));
+      const allVisible = affected.length > 0 && affected.every((t) => t.visible);
+      const nextVisible = !allVisible;
+      return {
+        uploadedTracks: state.uploadedTracks.map((t) =>
+          ids.has(t.folderId) ? { ...t, visible: nextVisible } : t
+        ),
+      };
+    }),
 
   // ── Working track ─────────────────────────────────────────────────────────────
   workingTrack: { name: 'My Track', segments: [] },
