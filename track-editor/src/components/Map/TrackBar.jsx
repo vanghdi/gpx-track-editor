@@ -15,9 +15,7 @@ const SELECTION_LABELS = {
   picking_free_end:   '📍 Click anywhere — set free end',
 };
 
-/**
- * Gap pill shown between two disconnected segments.
- */
+/** Gap pill shown between two disconnected segments. */
 function GapPill({ segIndex }) {
   const segments = useTrackStore((s) => s.workingTrack.segments);
   const insertSegmentAt = useTrackStore((s) => s.insertSegmentAt);
@@ -49,12 +47,7 @@ function GapPill({ segIndex }) {
       {error ? (
         <span className="track-bar__gap-error">!</span>
       ) : (
-        <button
-          className="track-bar__gap-route"
-          onClick={handleRoute}
-          disabled={routing}
-          title="Route this gap"
-        >
+        <button className="track-bar__gap-route" onClick={handleRoute} disabled={routing} title="Route this gap">
           {routing ? '…' : 'Route'}
         </button>
       )}
@@ -63,17 +56,24 @@ function GapPill({ segIndex }) {
 }
 
 /**
- * A single segment pill. In reorder mode shows ← → buttons instead of hover/remove.
+ * A single segment pill.
+ * In reorder mode: tapping selects it (highlighted ring). Remove button hidden.
  */
-function SegmentPill({ segment, index, total, reorderMode }) {
+function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
   const removeSegment = useTrackStore((s) => s.removeSegment);
-  const reorderSegments = useTrackStore((s) => s.reorderSegments);
   const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
   const setHoveredSegmentId = useTrackStore((s) => s.setHoveredSegmentId);
 
   const dist = formatDist(pathDistanceKm(segment.points || []));
   const isRouted = segment.type === 'routed';
   const isActive = !reorderMode && hoveredSegmentId === segment.id;
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (reorderMode) {
+      onSelect(index);
+    }
+  };
 
   return (
     <div
@@ -82,56 +82,29 @@ function SegmentPill({ segment, index, total, reorderMode }) {
         isRouted ? 'track-bar__pill--routed' : '',
         isActive ? 'track-bar__pill--active' : '',
         reorderMode ? 'track-bar__pill--reorder' : '',
+        isSelected ? 'track-bar__pill--selected' : '',
       ].filter(Boolean).join(' ')}
+      onClick={handleClick}
       onMouseEnter={() => !reorderMode && setHoveredSegmentId(segment.id)}
       onMouseLeave={() => !reorderMode && setHoveredSegmentId(null)}
-      onTouchStart={() => !reorderMode && setHoveredSegmentId(segment.id)}
-      onTouchEnd={() => !reorderMode && setHoveredSegmentId(null)}
     >
-      {reorderMode ? (
-        <>
-          <button
-            className="track-bar__pill-move"
-            onClick={() => index > 0 && reorderSegments(index, index - 1)}
-            disabled={index === 0}
-            title="Move left"
-            aria-label="Move segment left"
-          >
-            ←
-          </button>
-          <span className="track-bar__pill-num">#{index + 1}</span>
-          <span className="track-bar__pill-dist">{dist}</span>
-          <button
-            className="track-bar__pill-move"
-            onClick={() => index < total - 1 && reorderSegments(index, index + 1)}
-            disabled={index === total - 1}
-            title="Move right"
-            aria-label="Move segment right"
-          >
-            →
-          </button>
-        </>
-      ) : (
-        <>
-          <span className="track-bar__pill-num">#{index + 1}</span>
-          <span className="track-bar__pill-dist">{dist}</span>
-          <button
-            className="track-bar__pill-remove"
-            onClick={(e) => { e.stopPropagation(); removeSegment(segment.id); }}
-            aria-label={`Remove segment ${index + 1}`}
-            title="Remove segment"
-          >
-            ✕
-          </button>
-        </>
+      <span className="track-bar__pill-num">#{index + 1}</span>
+      <span className="track-bar__pill-dist">{dist}</span>
+      {!reorderMode && (
+        <button
+          className="track-bar__pill-remove"
+          onClick={(e) => { e.stopPropagation(); removeSegment(segment.id); }}
+          aria-label={`Remove segment ${index + 1}`}
+          title="Remove segment"
+        >
+          ✕
+        </button>
       )}
     </div>
   );
 }
 
-/**
- * Phantom pill — appears at start or end of the bar.
- */
+/** Phantom pill — appears at start or end of the bar. */
 function PhantomPill({ position, onClick, disabled }) {
   return (
     <button
@@ -145,9 +118,7 @@ function PhantomPill({ position, onClick, disabled }) {
   );
 }
 
-/**
- * Horizontal track editor bar pinned to the bottom of the map.
- */
+/** Horizontal track editor bar pinned to the bottom of the map. */
 export default function TrackBar() {
   const segments = useTrackStore((s) => s.workingTrack.segments);
   const workingTrack = useTrackStore((s) => s.workingTrack);
@@ -158,19 +129,20 @@ export default function TrackBar() {
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
   const getGapIndices = useTrackStore((s) => s.getGapIndices);
   const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
+  const reorderSegments = useTrackStore((s) => s.reorderSegments);
 
   const [reorderMode, setReorderMode] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const gapIndices = new Set(getGapIndices());
   const hasSegments = segments.length > 0;
   const downloadReady = isDownloadReady();
+  const totalKm = segments.reduce((sum, s) => sum + pathDistanceKm(s.points || []), 0);
 
   const firstIsRouted = hasSegments && segments[0].type === 'routed';
   const lastIsRouted  = hasSegments && segments[segments.length - 1].type === 'routed';
   const showStartPhantom = hasSegments && !firstIsRouted && !reorderMode;
   const showEndPhantom   = hasSegments && !lastIsRouted  && !reorderMode;
-
-  const totalKm = segments.reduce((sum, s) => sum + pathDistanceKm(s.points || []), 0);
 
   const handleDownload = () => {
     const xml = exportGPX(workingTrack.name, workingTrack.segments);
@@ -181,6 +153,23 @@ export default function TrackBar() {
     a.download = `${workingTrack.name.replace(/\s+/g, '_') || 'track'}.gpx`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleReorderToggle = () => {
+    setReorderMode((v) => !v);
+    setSelectedIndex(null);
+  };
+
+  const handleSelect = (index) => {
+    setSelectedIndex((prev) => prev === index ? null : index);
+  };
+
+  const handleMove = (direction) => {
+    if (selectedIndex === null) return;
+    const newIndex = selectedIndex + direction;
+    if (newIndex < 0 || newIndex >= segments.length) return;
+    reorderSegments(selectedIndex, newIndex);
+    setSelectedIndex(newIndex);
   };
 
   // ── Picking mode ──────────────────────────────────────────────
@@ -200,6 +189,20 @@ export default function TrackBar() {
   // ── Normal bar ────────────────────────────────────────────────
   return (
     <div className={`track-bar${reorderMode ? ' track-bar--reorder' : ''}`}>
+
+      {/* Reorder mode: ← button (left of scroll) */}
+      {reorderMode && (
+        <button
+          className="track-bar__move-btn"
+          onClick={() => handleMove(-1)}
+          disabled={selectedIndex === null || selectedIndex === 0}
+          title="Move selected segment left"
+          aria-label="Move left"
+        >
+          ←
+        </button>
+      )}
+
       {/* Scrollable segment track */}
       {hasSegments ? (
         <div className="track-bar__scroll">
@@ -207,14 +210,18 @@ export default function TrackBar() {
             {showStartPhantom && (
               <PhantomPill position="start" onClick={startFreeStartPicking} disabled={!!selectionMode} />
             )}
-
             {segments.map((seg, i) => (
-              <div key={seg.id} className="track-bar__seg-group">
-                <SegmentPill segment={seg} index={i} total={segments.length} reorderMode={reorderMode} />
+              <div key={seg.id} style={{ display: 'contents' }}>
+                <SegmentPill
+                  segment={seg}
+                  index={i}
+                  reorderMode={reorderMode}
+                  isSelected={selectedIndex === i}
+                  onSelect={handleSelect}
+                />
                 {!reorderMode && gapIndices.has(i) && <GapPill segIndex={i} />}
               </div>
             ))}
-
             {showEndPhantom && (
               <PhantomPill position="end" onClick={startFreeEndPicking} disabled={!!selectionMode} />
             )}
@@ -224,18 +231,31 @@ export default function TrackBar() {
         <span className="track-bar__hint">Add a segment to start building your track</span>
       )}
 
-      {/* Total distance — shown when there are segments */}
+      {/* Reorder mode: → button (right of scroll) */}
+      {reorderMode && (
+        <button
+          className="track-bar__move-btn"
+          onClick={() => handleMove(1)}
+          disabled={selectedIndex === null || selectedIndex === segments.length - 1}
+          title="Move selected segment right"
+          aria-label="Move right"
+        >
+          →
+        </button>
+      )}
+
+      {/* Total distance */}
       {hasSegments && (
         <span className="track-bar__total" title="Total track length">
           {formatDist(totalKm)}
         </span>
       )}
 
-      {/* Reorder toggle — only shown when there are 2+ segments */}
+      {/* Reorder toggle — only shown when 2+ segments */}
       {segments.length >= 2 && (
         <button
           className={`track-bar__reorder-toggle${reorderMode ? ' track-bar__reorder-toggle--active' : ''}`}
-          onClick={() => setReorderMode((v) => !v)}
+          onClick={handleReorderToggle}
           title={reorderMode ? 'Done reordering' : 'Reorder segments'}
           aria-label="Toggle reorder mode"
         >
@@ -243,29 +263,27 @@ export default function TrackBar() {
         </button>
       )}
 
-      {/* Add segment button */}
+      {/* Add + Download — hidden in reorder mode */}
       {!reorderMode && (
-        <button
-          className="track-bar__add"
-          onClick={startSegmentPicking}
-          title="Add segment"
-          aria-label="Add segment"
-        >
-          <span>+</span>
-        </button>
-      )}
-
-      {/* Download button */}
-      {!reorderMode && (
-        <button
-          className={`track-bar__download${downloadReady ? ' track-bar__download--ready' : ''}`}
-          onClick={handleDownload}
-          disabled={!downloadReady}
-          title={downloadReady ? 'Download GPX' : 'Connect all segments to enable download'}
-          aria-label="Download GPX"
-        >
-          ⬇
-        </button>
+        <>
+          <button
+            className="track-bar__add"
+            onClick={startSegmentPicking}
+            title="Add segment"
+            aria-label="Add segment"
+          >
+            <span>+</span>
+          </button>
+          <button
+            className={`track-bar__download${downloadReady ? ' track-bar__download--ready' : ''}`}
+            onClick={handleDownload}
+            disabled={!downloadReady}
+            title={downloadReady ? 'Download GPX' : 'Connect all segments to enable download'}
+            aria-label="Download GPX"
+          >
+            ⬇
+          </button>
+        </>
       )}
     </div>
   );

@@ -1861,9 +1861,8 @@ body {
 }
 
 .track-bar__pill--reorder {
-  cursor: default;
-  padding: 0 6px;
-  gap: 4px;
+  cursor: pointer;
+  padding: 0 10px;
 }
 
 .track-bar__pill--active {
@@ -1871,21 +1870,34 @@ body {
   transform: translateY(-1px);
 }
 
-/* ← → move buttons in reorder mode */
-.track-bar__pill-move {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  padding: 2px 4px;
-  color: var(--text-muted);
-  border-radius: 4px;
-  transition: color 0.12s, background 0.12s;
-  flex-shrink: 0;
+/* Selected pill in reorder mode — teal ring */
+.track-bar__pill--selected {
+  outline: 2.5px solid var(--teal);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(70, 156, 166, 0.2);
 }
-.track-bar__pill-move:hover:not(:disabled) { color: var(--text); background: rgba(255,255,255,0.15); }
-.track-bar__pill-move:disabled { opacity: 0.2; cursor: default; }
+
+/* Standalone ← → move buttons flanking the scroll area in reorder mode */
+.track-bar__move-btn {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1.5px solid var(--teal);
+  border-radius: var(--r-md);
+  color: var(--teal);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, opacity 0.12s;
+  line-height: 1;
+  margin: 0 2px;
+}
+.track-bar__move-btn:hover:not(:disabled) { background: rgba(70, 156, 166, 0.15); }
+.track-bar__move-btn:disabled { opacity: 0.2; cursor: default; border-color: var(--border); color: var(--text-muted); }
 
 .track-bar__pill--routed {
   background: var(--amber-dim);
