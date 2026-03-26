@@ -46,7 +46,6 @@ function GapPill({ segIndex }) {
 
   return (
     <div className="track-bar__gap-pill" title={error || undefined}>
-      <span className="track-bar__gap-icon">⚠</span>
       {error ? (
         <span className="track-bar__gap-error">!</span>
       ) : (
@@ -56,7 +55,7 @@ function GapPill({ segIndex }) {
           disabled={routing}
           title="Route this gap"
         >
-          {routing ? '…' : 'Route ▶'}
+          {routing ? '…' : 'Route'}
         </button>
       )}
     </div>
@@ -109,7 +108,7 @@ function PhantomPill({ position, onClick, disabled }) {
       disabled={disabled}
       title={position === 'start' ? 'Navigate to route start' : 'Navigate from route end'}
     >
-      {position === 'start' ? '↑ start' : 'end ↓'}
+      {position === 'start' ? 'start' : 'end'}
     </button>
   );
 }
