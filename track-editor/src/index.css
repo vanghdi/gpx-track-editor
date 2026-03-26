@@ -322,9 +322,11 @@ body {
 }
 
 .btn--sm {
-  font-size: 13px;
-  padding: 5px 10px;
-  letter-spacing: 0.05em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
 }
 
 .btn--full { width: 100%; }
@@ -1532,33 +1534,21 @@ body {
 /* Total distance badge — appears below redo button in the chrome actions column */
 .map-chrome__total {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 42px;
-  padding: 6px 4px;
+  padding: 8px 4px;
   background: var(--surface-2);
   border: 1px solid var(--border-bright);
   border-radius: var(--r-md);
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  line-height: 1.1;
-  gap: 1px;
-}
-.map-chrome__total-value {
   font-family: var(--font-ui);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--text);
   letter-spacing: 0.01em;
+  text-align: center;
   white-space: nowrap;
-}
-.map-chrome__total-unit {
-  font-family: var(--font-ui);
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--teal-light);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .drawer-backdrop {
@@ -1627,15 +1617,12 @@ body {
 }
 
 .settings-drawer__title {
-  font-family: var(--font-display);
-  font-size: 22px;
+  font-family: var(--font-ui);
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--text);
-  background: linear-gradient(135deg, var(--teal-light), var(--coral));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .settings-drawer__body {
@@ -1661,9 +1648,10 @@ body {
   opacity: 0.5;
   border-radius: var(--r-md);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   padding: 10px 16px;
   text-align: center;
   transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
@@ -1671,7 +1659,7 @@ body {
 .drawer-download--ready {
   opacity: 1;
   cursor: pointer;
-  color: var(--teal-light);
+  color: var(--text);
   border-color: var(--teal);
 }
 .drawer-download--ready:hover {
@@ -1690,9 +1678,9 @@ body {
 .drawer-label {
   display: block;
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-dim);
   margin-bottom: 8px;
@@ -1718,14 +1706,16 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
-  padding: 2px;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 2px 4px;
   line-height: 1;
-  opacity: 0.85;
-  transition: opacity 0.15s;
+  transition: color 0.15s;
   flex-shrink: 0;
 }
-.upload-header__pick:hover { opacity: 1; }
+.upload-header__pick:hover { color: var(--text); }
 .upload-header__label {
   flex: 1;
   font-family: var(--font-ui);

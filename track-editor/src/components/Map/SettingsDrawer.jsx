@@ -146,7 +146,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               aria-label="Toggle theme"
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {theme === 'dark' ? '☀ Light' : '◑ Dark'}
+              {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
           </div>
 
@@ -158,7 +158,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               onClick={onToggleLayer}
               title={`Switch to ${activeLayer === 'osm' ? 'Satellite' : 'OSM Map'}`}
             >
-              {activeLayer === 'osm' ? '🛰 Satellite' : '🗺 Map'}
+              {activeLayer === 'osm' ? 'Satellite' : 'Map'}
             </button>
           </div>
 
@@ -169,7 +169,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               onClick={openGoogleMaps}
               title="Open current view in Google Maps"
             >
-              🌐 Google Maps
+              Google Maps
             </button>
           </div>
 
@@ -195,7 +195,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
                 title="Upload GPX files"
                 aria-label="Upload GPX files"
               >
-                📂
+                ↑
               </button>
               <span className="upload-header__label">
                 GPX Tracks
@@ -239,7 +239,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               disabled={!downloadReady}
               title={downloadReady ? 'Download GPX track' : 'Connect all segments to enable download'}
             >
-              ⬇ Download GPX
+              Download GPX
             </button>
           </div>
 
@@ -255,7 +255,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
                 }
               }}
             >
-              🗑 New track (clear all)
+              New track
             </button>
           </div>
         </div>

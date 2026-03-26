@@ -64,15 +64,11 @@ export default function MapChrome({ activeLayer, onToggleLayer }) {
         >
           ↪
         </button>
-        {segments.length > 0 && (() => {
-          const { value, unit } = formatDist(totalKm);
-          return (
-            <span className="map-chrome__total" title="Total track length">
-              <span className="map-chrome__total-value">{value}</span>
-              <span className="map-chrome__total-unit">{unit}</span>
-            </span>
-          );
-        })()}
+        {segments.length > 0 && (
+          <span className="map-chrome__total" title="Total track length">
+            {formatDist(totalKm).value}
+          </span>
+        )}
       </div>
 
       <SettingsDrawer
