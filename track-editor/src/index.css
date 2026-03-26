@@ -116,16 +116,16 @@ body {
 
 /* ─── Layout ─────────────────────────────────────────────────── */
 .app-layout {
-  display: flex;
-  height: 100vh;
+  position: relative;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
 }
 
 .map-container {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
+  position: absolute;
+  inset: 0;
+  bottom: 0;
 }
 
 /* ─── Sidebar ────────────────────────────────────────────────── */
@@ -1008,43 +1008,13 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* ─── Map controls (layer + google maps) ─────────────────────── */
-.map-controls {
-  position: absolute;
-  bottom: 24px;
-  right: 12px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.map-layer-toggle {
-  background: var(--surface-2);
-  border: 1px solid var(--border-bright);
-  border-radius: var(--r-md);
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 7px 12px;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  transition: all 0.15s ease;
-  letter-spacing: 0.04em;
-}
-
-.map-layer-toggle:hover {
-  background: var(--surface-3);
-  border-color: var(--teal);
-  color: var(--teal-light);
-}
+/* ─── Map controls (layer + google maps) — REMOVED; moved to SettingsDrawer ─── */
 
 
 /* ─── Map Search Overlay ─────────────────────────────────────── */
 .map-search-overlay {
   position: absolute;
-  top: 12px;
+  top: 58px;
   right: 12px;
   z-index: 1000;
   width: 320px;
@@ -1436,23 +1406,514 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════
+   MAP CHROME  — Hamburger, Undo/Redo/Download floating buttons
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Hamburger — top left */
+.map-chrome__hamburger {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1100;
+  width: 42px;
+  height: 42px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: background 0.15s, border-color 0.15s;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+.map-chrome__hamburger:hover {
+  background: var(--surface-3);
+  border-color: var(--teal);
+}
+.map-chrome__hamburger-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.map-chrome__hamburger-lines span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+.map-chrome__hamburger:hover .map-chrome__hamburger-lines span {
+  background: var(--teal-light);
+}
+
+/* Action buttons — top right */
+.map-chrome__actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1100;
+  display: flex;
+  gap: 6px;
+}
+
+.map-chrome__btn {
+  width: 42px;
+  height: 42px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.map-chrome__btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--teal);
+  color: var(--teal-light);
+}
+.map-chrome__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.map-chrome__btn--download {
+  color: var(--text-muted);
+}
+.map-chrome__btn--download.map-chrome__btn--ready {
+  color: var(--teal-light);
+  border-color: var(--teal);
+}
+.map-chrome__btn--download.map-chrome__btn--ready:hover {
+  background: var(--teal);
+  color: #fff;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS DRAWER  — Slide-in from left
+   ═══════════════════════════════════════════════════════════════ */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1150;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.settings-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(340px, 90vw);
+  z-index: 1200;
+  background: var(--surface);
+  border-right: 1px solid var(--border-bright);
+  box-shadow: 6px 0 32px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Subtle topo-grid texture */
+.settings-drawer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(69, 156, 165, 0.05) 28px,
+      rgba(69, 156, 165, 0.05) 29px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 28px,
+      rgba(69, 156, 165, 0.05) 28px,
+      rgba(69, 156, 165, 0.05) 29px
+    );
+}
+
+.settings-drawer--open {
+  transform: translateX(0);
+}
+
+.settings-drawer__header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.settings-drawer__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--teal-light), var(--coral));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.settings-drawer__body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0 env(safe-area-inset-bottom, 0px);
+}
+
+.drawer-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.drawer-section:last-child { border-bottom: none; }
+
+.drawer-section--row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.drawer-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.drawer-section--row .drawer-label { margin-bottom: 0; }
+
+/* GPX Upload header */
+.upload-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1.5px dashed var(--border-bright);
+  border-radius: var(--r-md);
+  cursor: default;
+  transition: border-color 0.15s, background 0.15s;
+}
+.upload-header--drag {
+  border-color: var(--teal);
+  background: var(--teal-dim);
+}
+.upload-header__pick {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px;
+  line-height: 1;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+.upload-header__pick:hover { opacity: 1; }
+.upload-header__label {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+.upload-header__count {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+.upload-header__collapse {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+/* Settings section (API key etc) inside drawer */
+.settings-drawer .section--settings {
+  padding: 0;
+  border: none;
+}
+.settings-drawer .settings-toggle {
+  width: 100%;
+  padding: 12px 16px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TRACK BAR  — Horizontal segment bar at the bottom
+   ═══════════════════════════════════════════════════════════════ */
+
+.track-bar {
+  position: absolute;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border-bright);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
+  overflow: hidden;
+  /* Account for Leaflet zoom controls that might overlap */
+}
+
+/* Picking state: full-width status */
+.track-bar--picking {
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.track-bar__picking-label {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--teal-light);
+  letter-spacing: 0.05em;
+}
+
+.track-bar__cancel {
+  background: none;
+  border: 1px solid var(--coral-dim);
+  border-radius: var(--r-sm);
+  color: var(--coral);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.track-bar__cancel:hover { background: var(--coral-dim); border-color: var(--coral); }
+
+/* Add button */
+.track-bar__add {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  margin: 0 4px 0 8px;
+  background: var(--teal-dim);
+  border: 1.5px dashed var(--teal);
+  border-radius: var(--r-md);
+  color: var(--teal-light);
+  font-size: 22px;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1;
+}
+.track-bar__add:hover {
+  background: var(--teal);
+  border-color: var(--teal-light);
+  color: #fff;
+}
+
+/* Hint text when empty */
+.track-bar__hint {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+/* Scrollable pill container */
+.track-bar__scroll {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.track-bar__scroll::-webkit-scrollbar { display: none; }
+
+.track-bar__scroll-inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 4px;
+  height: 56px;
+  width: max-content;
+}
+
+/* Individual segment pill */
+.track-bar__seg-group {
+  display: contents;
+}
+
+.track-bar__pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 10px;
+  height: 36px;
+  background: var(--coral-dim);
+  border: 1.5px solid var(--coral);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.track-bar__pill--routed {
+  background: var(--amber-dim);
+  border-color: var(--amber);
+}
+
+.track-bar__pill--active {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+
+.track-bar__pill-num {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--coral);
+  letter-spacing: 0.04em;
+}
+.track-bar__pill--routed .track-bar__pill-num { color: var(--amber); }
+
+.track-bar__pill-dist {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.track-bar__pill-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 10px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.track-bar__pill-remove:hover { color: var(--coral); background: var(--coral-dim); }
+.track-bar__pill--routed .track-bar__pill-remove:hover { color: var(--amber); background: var(--amber-dim); }
+
+/* Gap pill between segments */
+.track-bar__gap-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 8px;
+  height: 32px;
+  border: 1.5px dashed var(--coral);
+  border-radius: 20px;
+  background: rgba(217, 72, 84, 0.08);
+  flex-shrink: 0;
+}
+
+.track-bar__gap-icon {
+  font-size: 12px;
+  color: var(--coral);
+}
+
+.track-bar__gap-route {
+  background: none;
+  border: none;
+  color: var(--coral);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--r-sm);
+  transition: background 0.15s;
+  letter-spacing: 0.04em;
+}
+.track-bar__gap-route:hover { background: var(--coral-dim); }
+.track-bar__gap-route:disabled { opacity: 0.5; cursor: wait; }
+.track-bar__gap-error { font-size: 11px; color: var(--coral); }
+
+/* Phantom pills at start/end */
+.track-bar__phantom {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  background: rgba(217, 137, 67, 0.1);
+  border: 1.5px dashed var(--amber);
+  border-radius: 20px;
+  color: var(--amber);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.track-bar__phantom:hover { background: var(--amber-dim); }
+.track-bar__phantom:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Ensure Leaflet zoom controls don't collide with track bar */
+.leaflet-bottom.leaflet-left { bottom: 60px; }
+.leaflet-bottom.leaflet-right { bottom: 60px; }
+
+
+/* ═══════════════════════════════════════════════════════════════
    MOBILE  (≤ 768px)
    ─── Bottom sheet panel + touch targets + overlay fixes ──────
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Mobile layout: map fills full screen ───────────────────── */
+/* ─── Mobile touch target improvements ──────────────────────── */
 @media (max-width: 768px) {
-  .app-layout {
-    flex-direction: column;
-  }
-
-  /* Map fills entire screen — panel floats over it */
-  .map-container {
-    flex: 1;
-    height: 100dvh;
-    /* bottom padding keeps Leaflet controls above collapsed panel */
-    padding-bottom: var(--panel-collapsed-h);
-  }
+  /* Remove legacy mobile panel overrides for app-layout and map-container —
+     the new map-first layout handles this without media queries */
 
   /* ─── Bottom sheet panel ───────────────────────────────────── */
   .mobile-panel {

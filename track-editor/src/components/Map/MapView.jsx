@@ -7,6 +7,7 @@ import PointSelector from './PointSelector';
 import LocationMarkerLayer from './LocationMarkerLayer';
 import PoiMarkerLayer from './PoiMarkerLayer';
 import MapSearchOverlay, { MapSearchCenterer } from './MapSearchOverlay';
+import MapChrome from './MapChrome';
 import useTrackStore from '../../store/trackStore';
 import { getBBox } from '../../utils/geoUtils';
 
@@ -41,27 +42,6 @@ function MapViewTracker() {
     },
   });
   return null;
-}
-
-function MapControls({ activeLayer, onToggleLayer }) {
-  const mapView = useTrackStore((s) => s.mapView);
-  const next = activeLayer === 'osm' ? 'satellite' : 'osm';
-
-  const openGoogleMaps = () => {
-    const { lat, lng, zoom } = mapView;
-    window.open(`https://www.google.com/maps/@${lat},${lng},${zoom}z`, '_blank', 'noopener');
-  };
-
-  return (
-    <div className="map-controls">
-      <button className="map-layer-toggle" title={`Switch to ${LAYERS[next].label}`} onClick={onToggleLayer}>
-        {LAYERS[next].label}
-      </button>
-      <button className="map-layer-toggle" title="Open this view in Google Maps" onClick={openGoogleMaps}>
-        🌐 Google Maps
-      </button>
-    </div>
-  );
 }
 
 function MapFitter() {
@@ -116,7 +96,7 @@ function GeolocationInit() {
 export default function MapView() {
   const [activeLayer, setActiveLayer] = useState('osm');
   const layer = LAYERS[activeLayer];
-  const mapRef = useRef(null); // shared between MapSearchCenterer (inside) and MapSearchOverlay (outside)
+  const mapRef = useRef(null);
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
@@ -141,7 +121,7 @@ export default function MapView() {
 
       <MapSearchOverlay mapRef={mapRef} />
 
-      <MapControls
+      <MapChrome
         activeLayer={activeLayer}
         onToggleLayer={() => setActiveLayer((l) => l === 'osm' ? 'satellite' : 'osm')}
       />
