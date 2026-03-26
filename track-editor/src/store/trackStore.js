@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
 import { areConnected } from '../utils/geoUtils';
 
 // Distinct colours for uploaded tracks — high-contrast on OSM light basemap
@@ -27,11 +29,73 @@ function normaliseSegment(seg) {
   return seg;
 }
 
-const useTrackStore = create((set, get) => ({
+/** IndexedDB storage adapter for Zustand persist */
+const idbStorage = createJSONStorage(() => ({
+  getItem: (name) => idbGet(name).then((v) => v ?? null),
+  setItem: (name, value) => idbSet(name, value),
+  removeItem: (name) => idbDel(name),
+}));
+
+const useTrackStore = create(
+  persist(
+    (set, get) => ({
+  // ── Folders ───────────────────────────────────────────────────────────────────
+  folders: [],
+
+  addFolder: (name, parentId = null) =>
+    set((state) => ({
+      folders: [
+        ...state.folders,
+        { id: crypto.randomUUID(), name, parentId, collapsed: false },
+      ],
+    })),
+
+  renameFolder: (id, name) =>
+    set((state) => ({
+      folders: state.folders.map((f) => (f.id === id ? { ...f, name } : f)),
+    })),
+
+  deleteFolder: (id) =>
+    set((state) => {
+      // Collect all descendant folder ids
+      const allIds = new Set([id]);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        state.folders.forEach((f) => {
+          if (f.parentId && allIds.has(f.parentId) && !allIds.has(f.id)) {
+            allIds.add(f.id);
+            changed = true;
+          }
+        });
+      }
+      return {
+        folders: state.folders.filter((f) => !allIds.has(f.id)),
+        // Move tracks from deleted folders to root
+        uploadedTracks: state.uploadedTracks.map((t) =>
+          allIds.has(t.folderId) ? { ...t, folderId: null } : t
+        ),
+      };
+    }),
+
+  toggleFolderCollapsed: (id) =>
+    set((state) => ({
+      folders: state.folders.map((f) =>
+        f.id === id ? { ...f, collapsed: !f.collapsed } : f
+      ),
+    })),
+
+  moveTrackToFolder: (trackId, folderId) =>
+    set((state) => ({
+      uploadedTracks: state.uploadedTracks.map((t) =>
+        t.id === trackId ? { ...t, folderId: folderId ?? null } : t
+      ),
+    })),
+
   // ── Uploaded tracks ──────────────────────────────────────────────────────────
   uploadedTracks: [],
 
-  addUploadedTrack: (name, points) =>
+  addUploadedTrack: (name, points, folderId = null) =>
     set((state) => ({
       uploadedTracks: [
         ...state.uploadedTracks,
@@ -41,6 +105,7 @@ const useTrackStore = create((set, get) => ({
           color: nextColor(),
           points,
           visible: true,
+          folderId: folderId ?? null,
         },
       ],
     })),
@@ -73,7 +138,7 @@ const useTrackStore = create((set, get) => ({
 
   // ── Working track ─────────────────────────────────────────────────────────────
   workingTrack: { name: 'My Track', segments: [] },
-  // Undo/redo history — each entry is a workingTrack snapshot
+  // Undo/redo history — NOT persisted (transient)
   _wt_history: [],
   _wt_future: [],
 
@@ -190,7 +255,7 @@ const useTrackStore = create((set, get) => ({
       },
     })),
 
-  // ── Map view (for Google Maps link) ──────────────────────────────────────────
+  // ── Map view (transient — not persisted) ─────────────────────────────────────
   mapView: { lat: 50.82, lng: 5.6, zoom: 13 },
   setMapView: (lat, lng, zoom) => set({ mapView: { lat, lng, zoom } }),
 
@@ -221,25 +286,21 @@ const useTrackStore = create((set, get) => ({
   previewMarker: null,
   setPreviewMarker: (marker) => set({ previewMarker: marker }),
 
-  // ── Hovered segment (sidebar hover → map highlight) ───────────────────────────
+  // ── Hovered segment (transient — not persisted) ───────────────────────────────
   hoveredSegmentId: null,
   setHoveredSegmentId: (id) => set({ hoveredSegmentId: id }),
 
-  // ── API key (persisted in localStorage) ──────────────────────────────────────
-  apiKey: localStorage.getItem('ors_api_key') || '',
-  setApiKey: (key) => {
-    localStorage.setItem('ors_api_key', key);
-    set({ apiKey: key });
-  },
+  // ── API key ───────────────────────────────────────────────────────────────────
+  apiKey: '',
+  setApiKey: (key) => set({ apiKey: key }),
 
   // ── Routing settings ─────────────────────────────────────────────────────────
-  routingProfile: 'cycling-mountain', // cycling-mountain | cycling-regular | foot-hiking
+  routingProfile: 'cycling-mountain',
   setRoutingProfile: (profile) => set({ routingProfile: profile }),
 
-  // ── Selection mode for picking segment endpoints ──────────────────────────────
-  // null | 'picking_start' | 'picking_end' | 'picking_free_start' | 'picking_free_end'
+  // ── Selection mode for picking segment endpoints (transient) ─────────────────
   selectionMode: null,
-  selectionStart: null, // {lat, lng, trackId, idx}
+  selectionStart: null,
 
   startSegmentPicking: () =>
     set({ selectionMode: 'picking_start', selectionStart: null }),
@@ -284,7 +345,6 @@ const useTrackStore = create((set, get) => ({
             type: 'routed',
             converted: true,
             waypoints: [first, click, last],
-            // Keep existing points as display geometry until ORS re-routes
             points: s.points,
           };
         }),
@@ -292,7 +352,6 @@ const useTrackStore = create((set, get) => ({
     })),
 
   // ── Computed helpers ──────────────────────────────────────────────────────────
-  /** Returns array of gap indices: index i means gap between segment[i] and segment[i+1] */
   getGapIndices: () => {
     const { segments } = get().workingTrack;
     const gaps = [];
@@ -340,6 +399,7 @@ const useTrackStore = create((set, get) => ({
   clearAll: () => {
     colorIdx = 0;
     set({
+      folders: [],
       uploadedTracks: [],
       workingTrack: { name: 'My Track', segments: [] },
       _wt_history: [],
@@ -351,6 +411,26 @@ const useTrackStore = create((set, get) => ({
       poiMarkers: [],
     });
   },
-}));
+    }),
+    {
+      name: 'track-editor-store',
+      storage: idbStorage,
+      // Exclude transient UI state from persistence
+      partialize: (state) => {
+        const {
+          _wt_history,
+          _wt_future,
+          selectionMode,
+          selectionStart,
+          previewMarker,
+          hoveredSegmentId,
+          mapView,
+          ...persisted
+        } = state;
+        return persisted;
+      },
+    }
+  )
+);
 
 export default useTrackStore;

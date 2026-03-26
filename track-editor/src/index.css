@@ -2261,3 +2261,283 @@ body {
   }
 }
 
+
+/* ─── Folder tree (Settings Drawer — GPX Tracks section) ─────── */
+.folder-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0 4px;
+}
+
+.folder-empty-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0 8px;
+  margin: 0;
+}
+
+.folder-add-root-btn {
+  margin-top: 6px;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 5px 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: color 0.15s, border-color 0.15s;
+}
+.folder-add-root-btn:hover { color: var(--teal); border-color: var(--teal); }
+
+/* Folder node */
+.folder-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-node-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px calc(var(--depth, 0) * 14px + 4px);
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.folder-node-header:hover { background: var(--surface-2); }
+
+.folder-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 10px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.folder-node-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-node-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.folder-node-header:hover .folder-node-actions { opacity: 1; }
+
+.folder-node-children {
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+  margin-left: 10px;
+}
+
+/* Track row */
+.folder-track-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.folder-track-row:hover { background: var(--surface-2); }
+
+.folder-track-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.folder-track-name {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.folder-track-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.folder-track-row:hover .folder-track-actions { opacity: 1; }
+
+/* Shared icon button */
+.folder-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: color 0.12s, background 0.12s;
+  line-height: 1;
+}
+.folder-icon-btn:hover { color: var(--text); background: var(--surface-3, #eee); }
+.folder-icon-btn--danger:hover { color: var(--coral); }
+
+/* Color swatch */
+.folder-color-swatch {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+/* Inline rename input */
+.folder-inline-input {
+  flex: 1;
+  font-size: 13px;
+  padding: 1px 6px;
+  border: 1px solid var(--teal);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+}
+
+/* Move-to-folder popup */
+.folder-move-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.folder-move-option {
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.12s;
+}
+.folder-move-option:hover { background: var(--surface-2); }
+.folder-move-option.active { color: var(--teal); font-weight: 600; }
+
+/* ─── Folder picker (post-upload inline picker) ─────────────── */
+.folder-picker {
+  background: var(--surface-2, rgba(0,0,0,0.04));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.folder-picker-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.folder-picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.folder-picker-option {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.12s, border-color 0.12s;
+}
+.folder-picker-option:hover { background: var(--surface-3, #eee); }
+.folder-picker-option.active {
+  border-color: var(--teal);
+  background: rgba(70, 156, 166, 0.12);
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.folder-picker-new {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.folder-picker-new-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  text-align: left;
+}
+.folder-picker-new-btn:hover { color: var(--teal); border-color: var(--teal); }
+
+.folder-picker-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.folder-picker-cancel, .folder-picker-confirm {
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.folder-picker-cancel {
+  background: none;
+  color: var(--text-muted);
+}
+.folder-picker-cancel:hover { background: var(--surface-2); }
+.folder-picker-confirm {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+}
+.folder-picker-confirm:hover { filter: brightness(1.1); }

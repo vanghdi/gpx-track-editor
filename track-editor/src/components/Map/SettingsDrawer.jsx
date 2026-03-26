@@ -2,8 +2,9 @@ import { useState, useRef, useCallback } from 'react';
 import useTrackStore from '../../store/trackStore';
 import { useTheme } from '../../hooks/useTheme';
 import { parseGPX } from '../../utils/gpxParser';
-import UploadedTrackItem from '../Sidebar/UploadedTrackItem';
 import ApiKeySettings from '../Sidebar/ApiKeySettings';
+import FolderTree from '../Sidebar/FolderTree';
+import FolderPicker from '../Sidebar/FolderPicker';
 import { ROUTING_PROFILES } from '../../utils/routingService';
 
 /**
@@ -22,23 +23,32 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
 
   const [tracksOpen, setTracksOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState(null); // parsed files awaiting folder pick
   const inputRef = useRef(null);
 
   const processFiles = useCallback((files) => {
+    const parsed = [];
+    let remaining = 0;
     Array.from(files).forEach((file) => {
       if (!file.name.toLowerCase().endsWith('.gpx')) return;
+      remaining++;
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const { name, points } = parseGPX(e.target.result);
-          addUploadedTrack(name || file.name.replace('.gpx', ''), points);
+          parsed.push({ name: name || file.name.replace('.gpx', ''), points });
         } catch {
           console.error('Failed to parse GPX:', file.name);
+        }
+        remaining--;
+        if (remaining === 0 && parsed.length > 0) {
+          setPendingFiles(parsed);
+          setTracksOpen(true);
         }
       };
       reader.readAsText(file);
     });
-  }, [addUploadedTrack]);
+  }, []);
 
   const handleDragOver = (e) => { e.preventDefault(); setDragging(true); };
   const handleDragLeave = (e) => {
@@ -188,12 +198,18 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               </button>
             </div>
 
-            {tracksOpen && uploadedTracks.length > 0 && (
-              <div className="track-list">
-                {uploadedTracks.map((track) => (
-                  <UploadedTrackItem key={track.id} track={track} />
-                ))}
-              </div>
+            {tracksOpen && pendingFiles && (
+              <FolderPicker
+                onConfirm={(folderId) => {
+                  pendingFiles.forEach(({ name, points }) => addUploadedTrack(name, points, folderId));
+                  setPendingFiles(null);
+                }}
+                onCancel={() => setPendingFiles(null)}
+              />
+            )}
+
+            {tracksOpen && !pendingFiles && (
+              <FolderTree />
             )}
           </div>
 
