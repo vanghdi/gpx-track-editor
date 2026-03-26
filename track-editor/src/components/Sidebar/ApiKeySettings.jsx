@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useTrackStore from '../../store/trackStore';
 
 export default function ApiKeySettings() {
@@ -7,6 +7,12 @@ export default function ApiKeySettings() {
   const [draft, setDraft] = useState(apiKey);
   const [saved, setSaved] = useState(false);
   const [open, setOpen] = useState(!apiKey);
+
+  // Sync draft when the persisted key loads from IndexedDB after mount
+  useEffect(() => {
+    setDraft(apiKey);
+    if (apiKey) setOpen(false);
+  }, [apiKey]);
 
   const handleSave = () => {
     setApiKey(draft.trim());
