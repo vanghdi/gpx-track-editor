@@ -26,7 +26,8 @@ export default function MapSearchOverlay({ mapRef }) {
   const addPoiMarkers        = useTrackStore((s) => s.addPoiMarkers);
   const clearPoiMarkers      = useTrackStore((s) => s.clearPoiMarkers);
 
-  // ── Compact/expand state — removed; search is always visible ─────────────────
+  // ── Compact/expand state ───────────────────────────────────────────────────────
+  const [expanded, setExpanded] = useState(false);
 
   // ── Location search state ──────────────────────────────────────────────────────
   const [query,        setQuery]        = useState('');
@@ -174,11 +175,12 @@ export default function MapSearchOverlay({ mapRef }) {
         setOpen(false);
         setShowPinPanel(false);
         setPreviewMarker(null);
+        if (!query) setExpanded(false);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [setPreviewMarker]);
+  }, [setPreviewMarker, query]);
 
   // ── Abort on unmount ───────────────────────────────────────────────────────────
   useEffect(() => () => {
@@ -188,164 +190,145 @@ export default function MapSearchOverlay({ mapRef }) {
 
   const shortLabel = (label) => label.split(',').slice(0, 3).join(',').trim();
 
-  // ── Always expanded ────────────────────────────────────────────────────────────
   return (
     <div
       ref={overlayRef}
-      className="map-search-overlay"
+      className={`map-search-overlay${expanded ? ' map-search-overlay--expanded' : ' map-search-overlay--compact'}`}
       role="search"
     >
-      {/* ── Search row ── */}
-      <div className="map-search-row">
-        <div className="map-search-input-wrap">
-          <span className="map-search-icon" aria-hidden>🔍</span>
-          <input
-            ref={inputRef}
-            className="map-search-input"
-            type="text"
-            placeholder="Search location…"
-            value={query}
-            onChange={handleChange}
-            onFocus={() => { if (results.length) setOpen(true); }}
-            autoComplete="off"
-            spellCheck={false}
-          />
-          {loading && <span className="map-search-spinner" aria-hidden />}
-        </div>
-
-        {/* Pins panel toggle */}
+      {/* ── Collapsed: single icon button ── */}
+      {!expanded && (
         <button
-          className={`map-search-pins-btn${showPinPanel ? ' active' : ''}`}
-          title="Pinned locations"
-          onClick={() => setShowPinPanel((v) => !v)}
+          className="map-search-compact-btn"
+          onClick={() => { setExpanded(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+          title="Search location"
+          aria-label="Open search"
         >
-          📍{locationMarkers.length > 0 && (
-            <span className="map-search-badge">{locationMarkers.length}</span>
+          🔍
+          {(locationMarkers.length > 0 || poiMarkers.length > 0) && (
+            <span className="map-search-badge">{locationMarkers.length + poiMarkers.length}</span>
           )}
         </button>
-
-        {/* POI panel expand/collapse */}
-        <button
-          className={`map-search-pins-btn${panelExpanded ? ' active' : ''}`}
-          title={panelExpanded ? 'Hide POI search' : 'Find POIs near track'}
-          onClick={() => { setPanelExpanded((v) => !v); setPoiError(null); }}
-        >
-          {panelExpanded ? '⌃' : '⌄'}
-        </button>
-      </div>
-
-      {/* ── Location search error ── */}
-      {error && <p className="map-search-error">{error}</p>}
-
-      {/* ── Results dropdown ── */}
-      {open && results.length > 0 && (
-        <ul
-          className="map-search-results"
-          role="listbox"
-          onMouseLeave={handleResultLeave}
-        >
-          {results.map((r) => (
-            <li
-              key={r.id}
-              className="map-search-result"
-              role="option"
-              onMouseEnter={() => handleResultHover(r)}
-              onMouseDown={() => handlePick(r)}
-            >
-              {shortLabel(r.label)}
-            </li>
-          ))}
-        </ul>
       )}
 
-      {/* ── Pins panel ── */}
-      {showPinPanel && (
-        <ul className="map-search-pins-panel" role="list">
-          {locationMarkers.length === 0 ? (
-            <li className="map-search-pins-empty">No pins yet</li>
-          ) : (
-            locationMarkers.map((m) => (
-              <li key={m.id} className="map-search-pin-item">
-                <button
-                  className="map-search-pin-label"
-                  onClick={() => handlePinClick(m)}
-                  title={m.label}
-                >
-                  {shortLabel(m.label)}
-                </button>
-                <button
-                  className="map-search-pin-remove"
-                  title="Remove"
-                  onClick={() => removeLocationMarker(m.id)}
-                >
-                  ×
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-      )}
-
-      {/* ── POI search panel ── */}
-      {panelExpanded && (
-        <div className="poi-panel">
-          <div className="poi-panel-label">Find near track</div>
-
-          {/* Category grid */}
-          <div className="poi-categories">
-            {POI_CATEGORIES.map((cat) => (
-              <button
-                key={cat.key}
-                className={`poi-category-btn${selectedCategories.includes(cat.key) ? ' selected' : ''}`}
-                title={cat.label}
-                onClick={() => toggleCategory(cat.key)}
-              >
-                <span className="poi-cat-icon">{cat.icon}</span>
-                <span className="poi-cat-label">{cat.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Radius + search */}
-          <div className="poi-controls">
-            <div className="poi-radius-wrap">
+      {/* ── Expanded: full search UI ── */}
+      {expanded && (
+        <>
+          <div className="map-search-row">
+            <div className="map-search-input-wrap">
+              <span className="map-search-icon" aria-hidden>🔍</span>
               <input
-                className="poi-radius-input"
-                type="number"
-                min="0.1"
-                max="50"
-                step="0.5"
-                value={radiusKm}
-                onChange={(e) => {
-                  const n = Number(e.target.value);
-                  if (!Number.isNaN(n)) setRadiusKm(Math.max(0.1, n));
-                }}
+                ref={inputRef}
+                className="map-search-input"
+                type="text"
+                placeholder="Search location…"
+                value={query}
+                onChange={handleChange}
+                onFocus={() => { if (results.length) setOpen(true); }}
+                autoComplete="off"
+                spellCheck={false}
               />
-              <span className="poi-radius-unit">km</span>
+              {loading && <span className="map-search-spinner" aria-hidden />}
             </div>
+
             <button
-              className="poi-search-btn"
-              onClick={handlePoiSearch}
-              disabled={poiLoading || selectedCategories.length === 0}
+              className={`map-search-pins-btn${showPinPanel ? ' active' : ''}`}
+              title="Pinned locations"
+              onClick={() => setShowPinPanel((v) => !v)}
             >
-              {poiLoading ? <span className="map-search-spinner" aria-hidden /> : 'Search'}
+              📍{locationMarkers.length > 0 && (
+                <span className="map-search-badge">{locationMarkers.length}</span>
+              )}
+            </button>
+
+            <button
+              className={`map-search-pins-btn${panelExpanded ? ' active' : ''}`}
+              title={panelExpanded ? 'Hide POI search' : 'Find POIs near track'}
+              onClick={() => { setPanelExpanded((v) => !v); setPoiError(null); }}
+            >
+              {panelExpanded ? '⌃' : '⌄'}
+            </button>
+
+            <button
+              className="map-search-pins-btn"
+              title="Close search"
+              onClick={() => { setExpanded(false); setQuery(''); setResults([]); setOpen(false); setShowPinPanel(false); setPanelExpanded(false); setPreviewMarker(null); }}
+              aria-label="Close search"
+            >
+              ✕
             </button>
           </div>
 
-          {/* Error */}
-          {poiError && <p className="map-search-error">{poiError}</p>}
+          {error && <p className="map-search-error">{error}</p>}
 
-          {/* Results row — always show Clear if markers exist */}
-          {poiMarkers.length > 0 && (
-            <div className="poi-results-row">
-              <span className="poi-results-count">{poiMarkers.length} result{poiMarkers.length !== 1 ? 's' : ''}</span>
-              <button className="poi-clear-btn" onClick={() => { clearPoiMarkers(); setPoiError(null); }}>
-                ✕ Clear
-              </button>
+          {open && results.length > 0 && (
+            <ul className="map-search-results" role="listbox" onMouseLeave={handleResultLeave}>
+              {results.map((r) => (
+                <li key={r.id} className="map-search-result" role="option"
+                  onMouseEnter={() => handleResultHover(r)}
+                  onMouseDown={() => handlePick(r)}
+                >
+                  {shortLabel(r.label)}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {showPinPanel && (
+            <ul className="map-search-pins-panel" role="list">
+              {locationMarkers.length === 0 ? (
+                <li className="map-search-pins-empty">No pins yet</li>
+              ) : (
+                locationMarkers.map((m) => (
+                  <li key={m.id} className="map-search-pin-item">
+                    <button className="map-search-pin-label" onClick={() => handlePinClick(m)} title={m.label}>
+                      {shortLabel(m.label)}
+                    </button>
+                    <button className="map-search-pin-remove" title="Remove" onClick={() => removeLocationMarker(m.id)}>×</button>
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
+
+          {panelExpanded && (
+            <div className="poi-panel">
+              <div className="poi-panel-label">Find near track</div>
+              <div className="poi-categories">
+                {POI_CATEGORIES.map((cat) => (
+                  <button key={cat.key}
+                    className={`poi-category-btn${selectedCategories.includes(cat.key) ? ' selected' : ''}`}
+                    title={cat.label} onClick={() => toggleCategory(cat.key)}
+                  >
+                    <span className="poi-cat-icon">{cat.icon}</span>
+                    <span className="poi-cat-label">{cat.label}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="poi-controls">
+                <div className="poi-radius-wrap">
+                  <input className="poi-radius-input" type="number" min="0.1" max="50" step="0.5"
+                    value={radiusKm}
+                    onChange={(e) => { const n = Number(e.target.value); if (!Number.isNaN(n)) setRadiusKm(Math.max(0.1, n)); }}
+                  />
+                  <span className="poi-radius-unit">km</span>
+                </div>
+                <button className="poi-search-btn" onClick={handlePoiSearch} disabled={poiLoading || selectedCategories.length === 0}>
+                  {poiLoading ? <span className="map-search-spinner" aria-hidden /> : 'Search'}
+                </button>
+              </div>
+              {poiError && <p className="map-search-error">{poiError}</p>}
+              {poiMarkers.length > 0 && (
+                <div className="poi-results-row">
+                  <span className="poi-results-count">{poiMarkers.length} result{poiMarkers.length !== 1 ? 's' : ''}</span>
+                  <button className="poi-clear-btn" onClick={() => { clearPoiMarkers(); setPoiError(null); }}>✕ Clear</button>
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
 }
+

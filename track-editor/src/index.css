@@ -1011,14 +1011,44 @@ body {
 /* ─── Map controls (layer + google maps) — REMOVED; moved to SettingsDrawer ─── */
 
 
-/* ─── Map Search Overlay — always visible below undo/redo ────── */
+/* ─── Map Search Overlay — below undo/redo, top-right ─────────── */
 .map-search-overlay {
   position: absolute;
   top: 58px;
   right: 12px;
   z-index: 1000;
-  width: min(320px, calc(100vw - 24px));
   pointer-events: auto;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.map-search-overlay--compact {
+  width: 42px;
+}
+
+.map-search-overlay--expanded {
+  width: min(320px, calc(100vw - 24px));
+}
+
+/* Compact icon button — matches chrome button style */
+.map-search-compact-btn {
+  width: 42px;
+  height: 42px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+}
+.map-search-compact-btn:hover {
+  background: var(--surface-3);
+  border-color: var(--teal);
 }
 
 .map-search-row {
