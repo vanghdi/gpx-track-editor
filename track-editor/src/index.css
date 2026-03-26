@@ -1820,9 +1820,10 @@ body {
   white-space: nowrap;
 }
 
-/* Scrollable pill container */
+/* Scrollable pill container — shrinks to content, capped so whole group stays centered */
 .track-bar__scroll {
-  flex: 1;
+  flex: 0 1 auto;
+  max-width: calc(100% - 110px); /* 110px reserved for + and ⬇ buttons + margins */
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
