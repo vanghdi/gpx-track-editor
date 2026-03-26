@@ -1,20 +1,4 @@
 import { useState } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  horizontalListSortingStrategy,
-  useSortable,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import useTrackStore from '../../store/trackStore';
 import { exportGPX } from '../../utils/gpxExporter';
 import { getRoute } from '../../utils/routingService';
@@ -33,7 +17,6 @@ const SELECTION_LABELS = {
 
 /**
  * Gap pill shown between two disconnected segments.
- * Tapping "Route" fills the gap via ORS.
  */
 function GapPill({ segIndex }) {
   const segments = useTrackStore((s) => s.workingTrack.segments);
@@ -80,75 +63,74 @@ function GapPill({ segIndex }) {
 }
 
 /**
- * A single segment pill in the horizontal track bar.
- * When `isDragOverlay` is true it renders as a floating copy (no sortable hooks).
+ * A single segment pill. In reorder mode shows ← → buttons instead of hover/remove.
  */
-function SegmentPill({ segment, index, isDragOverlay = false }) {
+function SegmentPill({ segment, index, total, reorderMode }) {
   const removeSegment = useTrackStore((s) => s.removeSegment);
+  const reorderSegments = useTrackStore((s) => s.reorderSegments);
   const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
   const setHoveredSegmentId = useTrackStore((s) => s.setHoveredSegmentId);
 
   const dist = formatDist(pathDistanceKm(segment.points || []));
   const isRouted = segment.type === 'routed';
-  const isActive = hoveredSegmentId === segment.id;
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: segment.id, disabled: isDragOverlay });
-
-  const style = isDragOverlay
-    ? {}
-    : {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.3 : 1,
-        touchAction: 'none',
-      };
+  const isActive = !reorderMode && hoveredSegmentId === segment.id;
 
   return (
     <div
-      ref={isDragOverlay ? undefined : setNodeRef}
-      style={style}
       className={[
         'track-bar__pill',
         isRouted ? 'track-bar__pill--routed' : '',
         isActive ? 'track-bar__pill--active' : '',
-        isDragOverlay ? 'track-bar__pill--dragging' : '',
+        reorderMode ? 'track-bar__pill--reorder' : '',
       ].filter(Boolean).join(' ')}
-      onMouseEnter={() => !isDragOverlay && setHoveredSegmentId(segment.id)}
-      onMouseLeave={() => !isDragOverlay && setHoveredSegmentId(null)}
-      onTouchStart={() => !isDragOverlay && setHoveredSegmentId(segment.id)}
-      onTouchEnd={() => !isDragOverlay && setHoveredSegmentId(null)}
-      {...(isDragOverlay ? {} : attributes)}
+      onMouseEnter={() => !reorderMode && setHoveredSegmentId(segment.id)}
+      onMouseLeave={() => !reorderMode && setHoveredSegmentId(null)}
+      onTouchStart={() => !reorderMode && setHoveredSegmentId(segment.id)}
+      onTouchEnd={() => !reorderMode && setHoveredSegmentId(null)}
     >
-      {/* Drag handle — invisible on desktop, explicit grab zone */}
-      {!isDragOverlay && (
-        <span className="track-bar__pill-handle" {...listeners} title="Drag to reorder">
-          ⠿
-        </span>
+      {reorderMode ? (
+        <>
+          <button
+            className="track-bar__pill-move"
+            onClick={() => index > 0 && reorderSegments(index, index - 1)}
+            disabled={index === 0}
+            title="Move left"
+            aria-label="Move segment left"
+          >
+            ←
+          </button>
+          <span className="track-bar__pill-num">#{index + 1}</span>
+          <span className="track-bar__pill-dist">{dist}</span>
+          <button
+            className="track-bar__pill-move"
+            onClick={() => index < total - 1 && reorderSegments(index, index + 1)}
+            disabled={index === total - 1}
+            title="Move right"
+            aria-label="Move segment right"
+          >
+            →
+          </button>
+        </>
+      ) : (
+        <>
+          <span className="track-bar__pill-num">#{index + 1}</span>
+          <span className="track-bar__pill-dist">{dist}</span>
+          <button
+            className="track-bar__pill-remove"
+            onClick={(e) => { e.stopPropagation(); removeSegment(segment.id); }}
+            aria-label={`Remove segment ${index + 1}`}
+            title="Remove segment"
+          >
+            ✕
+          </button>
+        </>
       )}
-      <span className="track-bar__pill-num">#{index + 1}</span>
-      <span className="track-bar__pill-dist">{dist}</span>
-      <button
-        className="track-bar__pill-remove"
-        onClick={(e) => { e.stopPropagation(); removeSegment(segment.id); }}
-        aria-label={`Remove segment ${index + 1}`}
-        title="Remove segment"
-      >
-        ✕
-      </button>
     </div>
   );
 }
 
 /**
- * Phantom pill — appears at start or end of the bar when a free
- * routed connection to the track start/end is possible.
+ * Phantom pill — appears at start or end of the bar.
  */
 function PhantomPill({ position, onClick, disabled }) {
   return (
@@ -165,10 +147,6 @@ function PhantomPill({ position, onClick, disabled }) {
 
 /**
  * Horizontal track editor bar pinned to the bottom of the map.
- * States:
- *   - normal: scrollable segment pills + + button
- *   - picking: status message + cancel (full width)
- *   - empty: just the + button
  */
 export default function TrackBar() {
   const segments = useTrackStore((s) => s.workingTrack.segments);
@@ -180,13 +158,8 @@ export default function TrackBar() {
   const cancelSelection = useTrackStore((s) => s.cancelSelection);
   const getGapIndices = useTrackStore((s) => s.getGapIndices);
   const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
-  const reorderSegments = useTrackStore((s) => s.reorderSegments);
 
-  const [activeDragId, setActiveDragId] = useState(null);
-
-  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 5 } });
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } });
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const [reorderMode, setReorderMode] = useState(false);
 
   const gapIndices = new Set(getGapIndices());
   const hasSegments = segments.length > 0;
@@ -194,8 +167,10 @@ export default function TrackBar() {
 
   const firstIsRouted = hasSegments && segments[0].type === 'routed';
   const lastIsRouted  = hasSegments && segments[segments.length - 1].type === 'routed';
-  const showStartPhantom = hasSegments && !firstIsRouted;
-  const showEndPhantom   = hasSegments && !lastIsRouted;
+  const showStartPhantom = hasSegments && !firstIsRouted && !reorderMode;
+  const showEndPhantom   = hasSegments && !lastIsRouted  && !reorderMode;
+
+  const totalKm = segments.reduce((sum, s) => sum + pathDistanceKm(s.points || []), 0);
 
   const handleDownload = () => {
     const xml = exportGPX(workingTrack.name, workingTrack.segments);
@@ -208,30 +183,14 @@ export default function TrackBar() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDragStart = ({ active }) => setActiveDragId(active.id);
-
-  const handleDragEnd = ({ active, over }) => {
-    setActiveDragId(null);
-    if (!over || active.id === over.id) return;
-    const fromIndex = segments.findIndex((s) => s.id === active.id);
-    const toIndex   = segments.findIndex((s) => s.id === over.id);
-    if (fromIndex !== -1 && toIndex !== -1) reorderSegments(fromIndex, toIndex);
-  };
-
-  const activeSeg = activeDragId ? segments.find((s) => s.id === activeDragId) : null;
-  const activeDragIndex = activeSeg ? segments.indexOf(activeSeg) : -1;
-
-  // ── Picking mode — bar shows status + cancel ──────────────────
+  // ── Picking mode ──────────────────────────────────────────────
   if (selectionMode) {
     return (
       <div className="track-bar track-bar--picking">
         <span className="track-bar__picking-label">
           {SELECTION_LABELS[selectionMode] || '🎯 Click map'}
         </span>
-        <button
-          className="track-bar__cancel"
-          onClick={cancelSelection}
-        >
+        <button className="track-bar__cancel" onClick={cancelSelection}>
           Cancel
         </button>
       </div>
@@ -240,51 +199,52 @@ export default function TrackBar() {
 
   // ── Normal bar ────────────────────────────────────────────────
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="track-bar">
-        {/* Scrollable segment track */}
-        {hasSegments ? (
-          <div className="track-bar__scroll">
-            <SortableContext
-              items={segments.map((s) => s.id)}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className="track-bar__scroll-inner">
-                {showStartPhantom && (
-                  <PhantomPill
-                    position="start"
-                    onClick={startFreeStartPicking}
-                    disabled={!!selectionMode}
-                  />
-                )}
+    <div className={`track-bar${reorderMode ? ' track-bar--reorder' : ''}`}>
+      {/* Scrollable segment track */}
+      {hasSegments ? (
+        <div className="track-bar__scroll">
+          <div className="track-bar__scroll-inner">
+            {showStartPhantom && (
+              <PhantomPill position="start" onClick={startFreeStartPicking} disabled={!!selectionMode} />
+            )}
 
-                {segments.map((seg, i) => (
-                  <div key={seg.id} className="track-bar__seg-group">
-                    <SegmentPill segment={seg} index={i} />
-                    {gapIndices.has(i) && <GapPill segIndex={i} />}
-                  </div>
-                ))}
-
-                {showEndPhantom && (
-                  <PhantomPill
-                    position="end"
-                    onClick={startFreeEndPicking}
-                    disabled={!!selectionMode}
-                  />
-                )}
+            {segments.map((seg, i) => (
+              <div key={seg.id} className="track-bar__seg-group">
+                <SegmentPill segment={seg} index={i} total={segments.length} reorderMode={reorderMode} />
+                {!reorderMode && gapIndices.has(i) && <GapPill segIndex={i} />}
               </div>
-            </SortableContext>
-          </div>
-        ) : (
-          <span className="track-bar__hint">Add a segment to start building your track</span>
-        )}
+            ))}
 
-        {/* Add segment button — right side */}
+            {showEndPhantom && (
+              <PhantomPill position="end" onClick={startFreeEndPicking} disabled={!!selectionMode} />
+            )}
+          </div>
+        </div>
+      ) : (
+        <span className="track-bar__hint">Add a segment to start building your track</span>
+      )}
+
+      {/* Total distance — shown when there are segments */}
+      {hasSegments && (
+        <span className="track-bar__total" title="Total track length">
+          {formatDist(totalKm)}
+        </span>
+      )}
+
+      {/* Reorder toggle — only shown when there are 2+ segments */}
+      {segments.length >= 2 && (
+        <button
+          className={`track-bar__reorder-toggle${reorderMode ? ' track-bar__reorder-toggle--active' : ''}`}
+          onClick={() => setReorderMode((v) => !v)}
+          title={reorderMode ? 'Done reordering' : 'Reorder segments'}
+          aria-label="Toggle reorder mode"
+        >
+          ⇄
+        </button>
+      )}
+
+      {/* Add segment button */}
+      {!reorderMode && (
         <button
           className="track-bar__add"
           onClick={startSegmentPicking}
@@ -293,8 +253,10 @@ export default function TrackBar() {
         >
           <span>+</span>
         </button>
+      )}
 
-        {/* Download button — far right */}
+      {/* Download button */}
+      {!reorderMode && (
         <button
           className={`track-bar__download${downloadReady ? ' track-bar__download--ready' : ''}`}
           onClick={handleDownload}
@@ -304,14 +266,7 @@ export default function TrackBar() {
         >
           ⬇
         </button>
-      </div>
-
-      {/* Floating drag overlay */}
-      <DragOverlay dropAnimation={null}>
-        {activeSeg ? (
-          <SegmentPill segment={activeSeg} index={activeDragIndex} isDragOverlay />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+      )}
+    </div>
   );
 }

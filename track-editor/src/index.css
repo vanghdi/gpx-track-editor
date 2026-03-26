@@ -1848,7 +1848,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 8px 0 6px;
+  padding: 0 8px 0 10px;
   height: 36px;
   background: var(--coral-dim);
   border: 1.5px solid var(--coral);
@@ -1860,39 +1860,36 @@ body {
   user-select: none;
 }
 
-/* Drag handle — subtle grip dots, only visible on hover / touch-hold */
-.track-bar__pill-handle {
-  font-size: 12px;
-  color: var(--text-dim);
-  cursor: grab;
-  padding: 0 2px;
-  flex-shrink: 0;
-  touch-action: none;
-  opacity: 0.4;
-  transition: opacity 0.15s;
-  line-height: 1;
-}
-.track-bar__pill:hover .track-bar__pill-handle { opacity: 1; }
-
-/* Dragging ghost — dimmed in place */
-.track-bar__pill[style*="opacity: 0.3"] { pointer-events: none; }
-
-/* Floating drag overlay — lifted copy */
-.track-bar__pill--dragging {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
-  transform: scale(1.06) rotate(-1.5deg);
-  opacity: 0.95;
-  cursor: grabbing;
-}
-
-.track-bar__pill--routed {
-  background: var(--amber-dim);
-  border-color: var(--amber);
+.track-bar__pill--reorder {
+  cursor: default;
+  padding: 0 6px;
+  gap: 4px;
 }
 
 .track-bar__pill--active {
   box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
   transform: translateY(-1px);
+}
+
+/* ← → move buttons in reorder mode */
+.track-bar__pill-move {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: color 0.12s, background 0.12s;
+  flex-shrink: 0;
+}
+.track-bar__pill-move:hover:not(:disabled) { color: var(--text); background: rgba(255,255,255,0.15); }
+.track-bar__pill-move:disabled { opacity: 0.2; cursor: default; }
+
+.track-bar__pill--routed {
+  background: var(--amber-dim);
+  border-color: var(--amber);
 }
 
 .track-bar__pill-num {
@@ -1929,6 +1926,47 @@ body {
 }
 .track-bar__pill-remove:hover { color: var(--coral); background: var(--coral-dim); }
 .track-bar__pill--routed .track-bar__pill-remove:hover { color: var(--amber); background: var(--amber-dim); }
+
+/* Total distance label */
+.track-bar__total {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 0 4px;
+  letter-spacing: 0.02em;
+}
+
+/* Reorder mode toggle button */
+.track-bar__reorder-toggle {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--r-md);
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.track-bar__reorder-toggle:hover { color: var(--text); }
+.track-bar__reorder-toggle--active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+
+/* Track bar in reorder mode: teal border hint */
+.track-bar--reorder {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
 
 /* Gap pill between segments */
 .track-bar__gap-pill {
