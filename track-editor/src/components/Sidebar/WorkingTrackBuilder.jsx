@@ -21,10 +21,10 @@ function formatKm(km) {
 }
 
 const SELECTION_LABELS = {
-  picking_start:      '🎯 Click map — set start point',
-  picking_end:        '🎯 Click map — set end point',
-  picking_free_start: '📍 Click anywhere — set free start',
-  picking_free_end:   '📍 Click anywhere — set free end',
+  picking_start:      'Click map — set start point',
+  picking_end:        'Click map — set end point',
+  picking_free_start: 'Click anywhere — set free start',
+  picking_free_end:   'Click anywhere — set free end',
 };
 
 export default function WorkingTrackBuilder() {
@@ -156,7 +156,7 @@ export default function WorkingTrackBuilder() {
       {selectionMode ? (
         <div className="selection-status">
           <span className="selection-status__text">
-            {SELECTION_LABELS[selectionMode] || '🎯 Click map'}
+            {SELECTION_LABELS[selectionMode] || 'Click map'}
           </span>
           <button className="btn btn--sm btn--ghost" onClick={cancelSelection}>
             Cancel

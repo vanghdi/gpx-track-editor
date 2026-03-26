@@ -8,10 +8,10 @@ function formatDist(km) {
 }
 
 const SELECTION_LABELS = {
-  picking_start:      '🎯 Click map — set start point',
-  picking_end:        '🎯 Click map — set end point',
-  picking_free_start: '📍 Click anywhere — set free start',
-  picking_free_end:   '📍 Click anywhere — set free end',
+  picking_start:      'Click map — set start point',
+  picking_end:        'Click map — set end point',
+  picking_free_start: 'Click anywhere — set free start',
+  picking_free_end:   'Click anywhere — set free end',
 };
 
 /** Gap pill shown between two disconnected segments. */
@@ -161,7 +161,7 @@ export default function TrackBar() {
     return (
       <div className="track-bar track-bar--picking">
         <span className="track-bar__picking-label">
-          {SELECTION_LABELS[selectionMode] || '🎯 Click map'}
+          {SELECTION_LABELS[selectionMode] || 'Click map'}
         </span>
         <button className="track-bar__cancel" onClick={cancelSelection}>
           Cancel

@@ -25,7 +25,7 @@ export default function DownloadButton() {
       onClick={handleDownload}
       title={ready ? 'Download GPX' : 'Add connected segments to enable download'}
     >
-      ⬇ Download GPX
+      Download GPX
     </button>
   );
 }
