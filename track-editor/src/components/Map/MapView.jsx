@@ -93,6 +93,20 @@ function GeolocationInit() {
   return null;
 }
 
+function MapCenterer() {
+  const map = useMap();
+  const centerMapOn = useTrackStore((s) => s.centerMapOn);
+  const clearCenterMapOn = useTrackStore((s) => s.clearCenterMapOn);
+
+  useEffect(() => {
+    if (!centerMapOn) return;
+    map.setView([centerMapOn.lat, centerMapOn.lng], map.getZoom(), { animate: true });
+    clearCenterMapOn();
+  }, [centerMapOn, map, clearCenterMapOn]);
+
+  return null;
+}
+
 export default function MapView() {
   const [activeLayer, setActiveLayer] = useState('osm');
   const layer = LAYERS[activeLayer];
@@ -117,6 +131,7 @@ export default function MapView() {
         <SelectionCursor />
         <MapViewTracker />
         <MapSearchCenterer mapRef={mapRef} />
+        <MapCenterer />
       </MapContainer>
 
       <MapSearchOverlay mapRef={mapRef} />

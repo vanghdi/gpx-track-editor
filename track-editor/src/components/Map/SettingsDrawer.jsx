@@ -17,10 +17,12 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const addUploadedTrack = useTrackStore((s) => s.addUploadedTrack);
   const clearAll = useTrackStore((s) => s.clearAll);
+  const loadProject = useTrackStore((s) => s.loadProject);
   const workingTrack = useTrackStore((s) => s.workingTrack);
+  const folders = useTrackStore((s) => s.folders);
+  const routingProfile = useTrackStore((s) => s.routingProfile);
   const workingTrackName = useTrackStore((s) => s.workingTrack.name);
   const setWorkingTrackName = useTrackStore((s) => s.setWorkingTrackName);
-  const routingProfile = useTrackStore((s) => s.routingProfile);
   const setRoutingProfile = useTrackStore((s) => s.setRoutingProfile);
   const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
   const { theme, toggle: toggleTheme } = useTheme();
@@ -80,6 +82,38 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
     a.download = `${(workingTrack.name || 'track').replace(/\s+/g, '_')}.gpx`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const projectInputRef = useRef(null);
+
+  const handleSaveProject = () => {
+    const data = { folders, uploadedTracks, workingTrack, routingProfile };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(workingTrack.name || 'project').replace(/\s+/g, '_')}.trackeditor`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoadProject = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (confirm('Load this project? Current work will be replaced.')) {
+          loadProject(data);
+          onClose();
+        }
+      } catch {
+        alert('Could not read project file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   return (
@@ -232,7 +266,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
           {/* API Key */}
           <ApiKeySettings />
 
-          {/* Download */}
+          {/* Download / Save project */}
           <div className="drawer-section">
             <button
               className={`btn btn--sm btn--full drawer-download${downloadReady ? ' drawer-download--ready' : ''}`}
@@ -242,6 +276,31 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
             >
               Download GPX
             </button>
+            <div className="drawer-project-row">
+              <button
+                className="btn btn--ghost btn--sm"
+                style={{ flex: 1 }}
+                onClick={handleSaveProject}
+                title="Save project as .trackeditor file"
+              >
+                Save project
+              </button>
+              <button
+                className="btn btn--ghost btn--sm"
+                style={{ flex: 1 }}
+                onClick={() => projectInputRef.current?.click()}
+                title="Load a .trackeditor project file"
+              >
+                Load project
+              </button>
+              <input
+                ref={projectInputRef}
+                type="file"
+                accept=".trackeditor,application/json"
+                style={{ display: 'none' }}
+                onChange={handleLoadProject}
+              />
+            </div>
           </div>
 
           {/* Danger zone */}

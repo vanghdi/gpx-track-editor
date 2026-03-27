@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeSlash, X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
+import { pathDistanceKm } from '../../utils/geoUtils';
 
 const PALETTE = [
   '#469CA6', '#73B8BF', '#D98943', '#D94854',
@@ -46,6 +47,11 @@ export default function UploadedTrackItem({ track }) {
               onClick={() => setEditingName(true)}
             >
               {track.name}
+              {track.points?.length > 1 && (
+                <span className="track-item__dist">
+                  ({Math.round(pathDistanceKm(track.points))})
+                </span>
+              )}
             </span>
           )}
         </div>

@@ -314,6 +314,11 @@ const useTrackStore = create(
   hoveredSegmentId: null,
   setHoveredSegmentId: (id) => set({ hoveredSegmentId: id }),
 
+  // ── Center map request (transient — triggers MapCenterer, then cleared) ───────
+  centerMapOn: null, // { lat, lng } or null
+  setCenterMapOn: (lat, lng) => set({ centerMapOn: { lat, lng } }),
+  clearCenterMapOn: () => set({ centerMapOn: null }),
+
   // ── API key ───────────────────────────────────────────────────────────────────
   apiKey: '',
   setApiKey: (key) => set({ apiKey: key }),
@@ -435,6 +440,24 @@ const useTrackStore = create(
       poiMarkers: [],
     });
   },
+
+  // ── Load project (import a saved .trackeditor JSON) ───────────────────────────
+  loadProject: (data) => {
+    colorIdx = (data.uploadedTracks?.length ?? 0) % TRACK_COLORS.length;
+    set({
+      folders: data.folders ?? [],
+      uploadedTracks: data.uploadedTracks ?? [],
+      workingTrack: data.workingTrack ?? { name: 'My Track', segments: [] },
+      routingProfile: data.routingProfile ?? 'cycling-mountain',
+      _wt_history: [],
+      _wt_future: [],
+      selectionMode: null,
+      selectionStart: null,
+      locationMarkers: [],
+      previewMarker: null,
+      poiMarkers: [],
+    });
+  },
     }),
     {
       name: 'track-editor-store',
@@ -448,6 +471,7 @@ const useTrackStore = create(
           selectionStart,
           previewMarker,
           hoveredSegmentId,
+          centerMapOn,
           mapView,
           ...persisted
         } = state;

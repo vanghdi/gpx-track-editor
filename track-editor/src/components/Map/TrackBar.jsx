@@ -63,6 +63,7 @@ function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
   const removeSegment = useTrackStore((s) => s.removeSegment);
   const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
   const setHoveredSegmentId = useTrackStore((s) => s.setHoveredSegmentId);
+  const setCenterMapOn = useTrackStore((s) => s.setCenterMapOn);
 
   const dist = formatDist(pathDistanceKm(segment.points || []));
   const isRouted = segment.type === 'routed';
@@ -72,6 +73,13 @@ function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
     e.stopPropagation();
     if (reorderMode) {
       onSelect(index);
+    } else {
+      // Center map on segment midpoint without zooming
+      const pts = segment.points || [];
+      if (pts.length > 0) {
+        const mid = pts[Math.floor(pts.length / 2)];
+        setCenterMapOn(mid.lat, mid.lng);
+      }
     }
   };
 
