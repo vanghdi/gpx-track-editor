@@ -115,6 +115,46 @@ const useTrackStore = create(
       uploadedTracks: state.uploadedTracks.filter((t) => t.id !== id),
     })),
 
+  /**
+   * Bulk-import tracks with optional folder paths.
+   * items: [{ pathSegments: string[], name: string, points: [] }]
+   * pathSegments is the folder hierarchy (empty = root).
+   * Folders are find-or-created by name+parentId.
+   */
+  addTracksWithFolders: (items) =>
+    set((state) => {
+      const folders = [...state.folders];
+      const uploadedTracks = [...state.uploadedTracks];
+
+      // Find or create a folder by name under parentId
+      const findOrCreate = (name, parentId) => {
+        const existing = folders.find(
+          (f) => f.name === name && (f.parentId ?? null) === (parentId ?? null)
+        );
+        if (existing) return existing.id;
+        const id = crypto.randomUUID();
+        folders.push({ id, name, parentId: parentId ?? null, collapsed: false });
+        return id;
+      };
+
+      items.forEach(({ pathSegments, name, points }) => {
+        let folderId = null;
+        for (const seg of (pathSegments || [])) {
+          folderId = findOrCreate(seg, folderId);
+        }
+        uploadedTracks.push({
+          id: crypto.randomUUID(),
+          name,
+          color: nextColor(),
+          points,
+          visible: false,
+          folderId,
+        });
+      });
+
+      return { folders, uploadedTracks };
+    }),
+
   updateTrackName: (id, name) =>
     set((state) => ({
       uploadedTracks: state.uploadedTracks.map((t) =>

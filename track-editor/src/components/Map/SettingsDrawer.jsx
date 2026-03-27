@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { X, ArrowUp, CaretUp, CaretDown } from '@phosphor-icons/react';
+import { X, ArrowUp, CaretUp, CaretDown, FolderSimple } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { useTheme } from '../../hooks/useTheme';
 import { parseGPX } from '../../utils/gpxParser';
@@ -16,6 +16,7 @@ import { ROUTING_PROFILES } from '../../utils/routingService';
 export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLayer, mapView }) {
   const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const addUploadedTrack = useTrackStore((s) => s.addUploadedTrack);
+  const addTracksWithFolders = useTrackStore((s) => s.addTracksWithFolders);
   const clearAll = useTrackStore((s) => s.clearAll);
   const loadProject = useTrackStore((s) => s.loadProject);
   const workingTrack = useTrackStore((s) => s.workingTrack);
@@ -29,42 +30,176 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
 
   const [tracksOpen, setTracksOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
-  const [pendingFiles, setPendingFiles] = useState(null); // parsed files awaiting folder pick
+  const [pendingFiles, setPendingFiles] = useState(null); // parsed flat files awaiting folder pick
   const inputRef = useRef(null);
+  const folderInputRef = useRef(null);
 
-  const processFiles = useCallback((files) => {
-    const parsed = [];
-    let remaining = 0;
-    Array.from(files).forEach((file) => {
-      if (!file.name.toLowerCase().endsWith('.gpx')) return;
-      remaining++;
+  // ── Parse a single GPX file to {name, points} or null ────────────────────────
+  const parseGPXFile = (file) =>
+    new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const { name, points } = parseGPX(e.target.result);
-          parsed.push({ name: name || file.name.replace('.gpx', ''), points });
+          resolve({ name: name || file.name.replace(/\.gpx$/i, ''), points });
         } catch {
           console.error('Failed to parse GPX:', file.name);
+          resolve(null);
         }
+      };
+      reader.readAsText(file);
+    });
+
+  // ── Handle .trackeditor file ──────────────────────────────────────────────────
+  const handleTrackEditorFile = useCallback((file) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (confirm('Load this project? Current work will be replaced.')) {
+          loadProject(data);
+          onClose();
+        }
+      } catch {
+        alert('Could not read project file.');
+      }
+    };
+    reader.readAsText(file);
+  }, [loadProject, onClose]);
+
+  // ── Flat file pick (GPX or .trackeditor, no folder structure) ─────────────────
+  const processFiles = useCallback((files) => {
+    const arr = Array.from(files);
+
+    // .trackeditor takes priority — process the first one found
+    const projectFile = arr.find((f) => f.name.toLowerCase().endsWith('.trackeditor'));
+    if (projectFile) {
+      const gpxFiles = arr.filter((f) => f.name.toLowerCase().endsWith('.gpx'));
+      if (gpxFiles.length > 0) {
+        if (!confirm('Loading a project replaces all current data. GPX files in this batch will be ignored.\n\nProceed?')) return;
+      }
+      handleTrackEditorFile(projectFile);
+      return;
+    }
+
+    // Regular GPX files — go through FolderPicker (no path info)
+    const gpxFiles = arr.filter((f) => f.name.toLowerCase().endsWith('.gpx'));
+    if (gpxFiles.length === 0) return;
+
+    let remaining = gpxFiles.length;
+    const parsed = [];
+    gpxFiles.forEach((file) => {
+      parseGPXFile(file).then((result) => {
+        if (result) parsed.push(result);
         remaining--;
         if (remaining === 0 && parsed.length > 0) {
           setPendingFiles(parsed);
           setTracksOpen(true);
         }
-      };
-      reader.readAsText(file);
+      });
     });
-  }, []);
+  }, [handleTrackEditorFile]);
+
+  // ── Folder pick — reads webkitRelativePath for hierarchy ──────────────────────
+  const processFolderFiles = useCallback(async (files) => {
+    const arr = Array.from(files).filter((f) => f.name.toLowerCase().endsWith('.gpx'));
+    if (arr.length === 0) return;
+
+    const items = await Promise.all(
+      arr.map(async (file) => {
+        const result = await parseGPXFile(file);
+        if (!result) return null;
+        // webkitRelativePath: "FolderA/SubFolder/track.gpx"
+        const relPath = file.webkitRelativePath || '';
+        const parts = relPath.split('/').filter(Boolean);
+        // Drop the filename (last part), keep folder segments
+        const pathSegments = parts.length > 1 ? parts.slice(0, -1) : [];
+        return { pathSegments, name: result.name, points: result.points };
+      })
+    );
+
+    const valid = items.filter(Boolean);
+    if (valid.length > 0) {
+      addTracksWithFolders(valid);
+      setTracksOpen(true);
+    }
+  }, [addTracksWithFolders]);
+
+  // ── Recursive folder traversal for drag-drop (desktop) ───────────────────────
+  const traverseEntry = (entry, pathSegments = []) => {
+    return new Promise((resolve) => {
+      if (entry.isFile) {
+        if (!entry.name.toLowerCase().endsWith('.gpx')) return resolve([]);
+        entry.file((file) => {
+          parseGPXFile(file).then((result) => {
+            if (!result) return resolve([]);
+            resolve([{ pathSegments, name: result.name, points: result.points }]);
+          });
+        });
+      } else if (entry.isDirectory) {
+        const reader = entry.createReader();
+        const allEntries = [];
+        const readBatch = () => {
+          reader.readEntries((batch) => {
+            if (batch.length === 0) {
+              Promise.all(
+                allEntries.map((e) => traverseEntry(e, [...pathSegments, entry.name]))
+              ).then((nested) => resolve(nested.flat()));
+            } else {
+              allEntries.push(...batch);
+              readBatch();
+            }
+          });
+        };
+        readBatch();
+      } else {
+        resolve([]);
+      }
+    });
+  };
 
   const handleDragOver = (e) => { e.preventDefault(); setDragging(true); };
   const handleDragLeave = (e) => {
     if (!e.currentTarget.contains(e.relatedTarget)) setDragging(false);
   };
-  const handleDrop = (e) => {
+  const handleDrop = useCallback(async (e) => {
     e.preventDefault();
     setDragging(false);
+
+    const items = e.dataTransfer.items ? Array.from(e.dataTransfer.items) : [];
+    const files = e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+
+    // Check for .trackeditor in flat files first
+    const projectFile = files.find((f) => f.name.toLowerCase().endsWith('.trackeditor'));
+    if (projectFile) {
+      const gpxFiles = files.filter((f) => f.name.toLowerCase().endsWith('.gpx'));
+      if (gpxFiles.length > 0) {
+        if (!confirm('Loading a project replaces all current data. GPX files in this batch will be ignored.\n\nProceed?')) return;
+      }
+      handleTrackEditorFile(projectFile);
+      return;
+    }
+
+    // Try folder traversal via DataTransferItem.webkitGetAsEntry
+    const hasEntryAPI = items.length > 0 && typeof items[0].webkitGetAsEntry === 'function';
+    if (hasEntryAPI) {
+      const entries = items.map((item) => item.webkitGetAsEntry()).filter(Boolean);
+      const hasDir = entries.some((e) => e.isDirectory);
+
+      if (hasDir) {
+        const all = await Promise.all(entries.map((entry) => traverseEntry(entry)));
+        const flat = all.flat();
+        if (flat.length > 0) {
+          addTracksWithFolders(flat);
+          setTracksOpen(true);
+        }
+        return;
+      }
+    }
+
+    // Fallback: flat file list
     processFiles(e.dataTransfer.files);
-  };
+  }, [handleTrackEditorFile, processFiles, addTracksWithFolders]);
 
   const openGoogleMaps = () => {
     if (!mapView) return;
@@ -210,13 +345,24 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
 
           {/* GPX Tracks */}
           <div className="drawer-section section--upload">
+            {/* Flat file picker: GPX + .trackeditor */}
             <input
               ref={inputRef}
               type="file"
-              accept=".gpx"
+              accept=".gpx,.trackeditor"
               multiple
               style={{ display: 'none' }}
-              onChange={(e) => processFiles(e.target.files)}
+              onChange={(e) => { processFiles(e.target.files); e.target.value = ''; }}
+            />
+            {/* Folder picker: GPX only, desktop only (webkitdirectory) */}
+            <input
+              ref={folderInputRef}
+              type="file"
+              // @ts-ignore — webkitdirectory is non-standard
+              webkitdirectory=""
+              multiple
+              style={{ display: 'none' }}
+              onChange={(e) => { processFolderFiles(e.target.files); e.target.value = ''; }}
             />
             <div
               className={`upload-header${dragging ? ' upload-header--drag' : ''}`}
@@ -227,13 +373,21 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               <button
                 className="upload-header__pick"
                 onClick={() => inputRef.current?.click()}
-                title="Upload GPX files"
-                aria-label="Upload GPX files"
+                title="Upload GPX or .trackeditor files"
+                aria-label="Upload files"
               >
                 <ArrowUp size={16} weight="bold" />
               </button>
+              <button
+                className="upload-header__pick upload-header__pick--folder"
+                onClick={() => folderInputRef.current?.click()}
+                title="Upload a folder of GPX files (desktop only)"
+                aria-label="Upload folder"
+              >
+                <FolderSimple size={16} weight="bold" />
+              </button>
               <span className="upload-header__label">
-                GPX Tracks
+                Tracks
                 {uploadedTracks.length > 0 && (
                   <span className="upload-header__count">({uploadedTracks.length})</span>
                 )}
