@@ -91,7 +91,8 @@ export default function MapSearchOverlay({ mapRef }) {
       }
     } catch (e) {
       if (!controller.signal.aborted) {
-        setError('Search failed');
+        console.error('[Location search error]', e);
+        setError(e?.message || 'Search failed');
         setResults([]);
         setOpen(false);
       }
@@ -179,7 +180,10 @@ export default function MapSearchOverlay({ mapRef }) {
         if (results.length === 0) setPoiError('No results found in this area.');
       }
     } catch (e) {
-      if (!controller.signal.aborted) setPoiError('Search failed. Try again.');
+      if (!controller.signal.aborted) {
+        console.error('[POI search error]', e);
+        setPoiError(e?.message || 'Search failed. Try again.');
+      }
     } finally {
       if (!controller.signal.aborted) setPoiLoading(false);
     }

@@ -163,7 +163,11 @@ export async function searchPoiNearTrack({ categories, radiusM, points, signal }
     signal,
   });
 
-  if (!res.ok) throw new Error(`Overpass API error: HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    console.error('[Overpass] HTTP', res.status, body);
+    throw new Error(`Overpass API error: HTTP ${res.status}${body ? ' — ' + body.slice(0, 200) : ''}`);
+  }
 
   const data = await res.json();
   return parseResults(data.elements ?? []);
