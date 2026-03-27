@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeSlash, FolderSimple, FolderSimplePlus, CaretRight, CaretDown, X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
+import { pathDistanceKm } from '../../utils/geoUtils';
 
 /** Single uploaded track row inside the folder tree */
 function TrackRow({ track }) {
@@ -31,6 +32,11 @@ function TrackRow({ track }) {
       ) : (
         <span className="folder-track-name" title={track.name} onDoubleClick={() => setEditing(true)}>
           {track.name}
+          {track.points?.length > 1 && (
+            <span className="folder-track-dist">
+              ({pathDistanceKm(track.points).toFixed(1)})
+            </span>
+          )}
         </span>
       )}
 

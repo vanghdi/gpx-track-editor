@@ -2499,6 +2499,13 @@ body {
   cursor: default;
 }
 
+.folder-track-dist {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 4px;
+  font-weight: 400;
+}
+
 .folder-track-actions {
   display: flex;
   align-items: center;
