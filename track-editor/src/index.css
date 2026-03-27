@@ -2491,7 +2491,7 @@ body {
 
 .folder-track-name {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
@@ -2500,8 +2500,8 @@ body {
 }
 
 .folder-track-dist {
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 13px;
+  color: var(--text);
   margin-left: 4px;
   font-weight: 400;
 }
