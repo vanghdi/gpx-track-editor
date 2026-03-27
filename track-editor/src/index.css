@@ -1121,6 +1121,38 @@ body {
   padding: 0 4px;
 }
 
+/* Debug error popup */
+.map-search-error-popup {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #1a0a0a;
+  border: 1px solid var(--coral);
+  border-radius: var(--r-md);
+  padding: 8px 10px;
+  margin-top: 6px;
+}
+.map-search-error-msg {
+  flex: 1;
+  font-family: monospace;
+  font-size: 11px;
+  color: #ff8a8a;
+  line-height: 1.4;
+  word-break: break-all;
+}
+.map-search-error-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--coral);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+.map-search-error-close:hover { opacity: 1; }
+
 /* Pins toggle button */
 .map-search-pins-btn {
   position: relative;

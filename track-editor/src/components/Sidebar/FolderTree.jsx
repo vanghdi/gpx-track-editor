@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, EyeSlash, FolderSimple, FolderSimplePlus, CaretRight, CaretDown, X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 
 /** Single uploaded track row inside the folder tree */
@@ -46,21 +47,21 @@ function TrackRow({ track }) {
           title={track.visible ? 'Hide' : 'Show'}
           onClick={() => toggleTrackVisibility(track.id)}
         >
-          {track.visible ? '👁' : '🙈'}
+          {track.visible ? <Eye size={14} weight="regular" /> : <EyeSlash size={14} weight="regular" />}
         </button>
         <button
           className="folder-icon-btn"
           title="Move to folder"
           onClick={() => setShowMove((v) => !v)}
         >
-          📂
+          <FolderSimple size={14} weight="regular" />
         </button>
         <button
           className="folder-icon-btn folder-icon-btn--danger"
           title="Remove track"
           onClick={() => removeUploadedTrack(track.id)}
         >
-          ✕
+          <X size={12} weight="bold" />
         </button>
       </div>
 
@@ -121,7 +122,7 @@ function FolderNode({ folder, depth = 0, allFolders, allTracks }) {
           onClick={() => toggleFolderCollapsed(folder.id)}
           aria-label={folder.collapsed ? 'Expand' : 'Collapse'}
         >
-          {folder.collapsed ? '▶' : '▼'}
+          {folder.collapsed ? <CaretRight size={12} weight="bold" /> : <CaretDown size={12} weight="bold" />}
         </button>
 
         {editing ? (
@@ -135,7 +136,7 @@ function FolderNode({ folder, depth = 0, allFolders, allTracks }) {
           />
         ) : (
           <span className="folder-node-name" onDoubleClick={() => setEditing(true)}>
-            📁 {folder.name}
+            <FolderSimple size={14} weight="regular" style={{ flexShrink: 0 }} /> {folder.name}
           </span>
         )}
 
@@ -145,13 +146,13 @@ function FolderNode({ folder, depth = 0, allFolders, allTracks }) {
             title={allVisible ? 'Hide all in folder' : 'Show all in folder'}
             onClick={() => toggleFolderVisibility(folder.id)}
           >
-            {allVisible ? '👁' : '🙈'}
+            {allVisible ? <Eye size={14} weight="regular" /> : <EyeSlash size={14} weight="regular" />}
           </button>
           <button className="folder-icon-btn" title="Add subfolder" onClick={() => addFolder('New folder', folder.id)}>
-            +📁
+            <FolderSimplePlus size={14} weight="regular" />
           </button>
           <button className="folder-icon-btn folder-icon-btn--danger" title="Delete folder" onClick={() => deleteFolder(folder.id)}>
-            ✕
+            <X size={12} weight="bold" />
           </button>
         </div>
       </div>

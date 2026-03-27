@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, EyeSlash, X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 
 const PALETTE = [
@@ -54,14 +55,14 @@ export default function UploadedTrackItem({ track }) {
             title={track.visible ? 'Hide' : 'Show'}
             onClick={() => toggleTrackVisibility(track.id)}
           >
-            {track.visible ? '👁' : '👁‍🗨'}
+            {track.visible ? <Eye size={14} weight="regular" /> : <EyeSlash size={14} weight="regular" />}
           </button>
           <button
             className="icon-btn icon-btn--danger"
             title="Remove track"
             onClick={() => removeUploadedTrack(track.id)}
           >
-            ✕
+            <X size={12} weight="bold" />
           </button>
         </div>
       </div>

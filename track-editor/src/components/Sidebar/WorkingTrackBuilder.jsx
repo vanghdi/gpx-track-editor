@@ -10,6 +10,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
+import { ArrowCounterClockwise, ArrowClockwise, ArrowUp } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import SegmentItem from './SegmentItem';
 import { pathDistanceKm } from '../../utils/geoUtils';
@@ -76,14 +77,17 @@ export default function WorkingTrackBuilder() {
             disabled={!canUndo}
             title="Undo (⌘Z)"
             aria-label="Undo"
-          >↩</button>
+          >
+            <ArrowCounterClockwise size={14} weight="bold" />
+          </button>
           <button
             className="undo-btn"
             onClick={redo}
             disabled={!canRedo}
             title="Redo (⌘⇧Z)"
             aria-label="Redo"
-          >↪</button>
+          >
+            <ArrowClockwise size={14} weight="bold" /></button>
         </div>
       </div>
 
@@ -117,7 +121,7 @@ export default function WorkingTrackBuilder() {
             disabled={!!selectionMode}
             title="Route from a free start point to the beginning of this track"
           >
-            <span className="phantom-segment__icon">↑</span>
+            <span className="phantom-segment__icon"><ArrowUp size={14} weight="bold" /></span>
             <span>Navigate to route start</span>
           </button>
         )}

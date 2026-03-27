@@ -1,6 +1,7 @@
 import useTrackStore from '../../store/trackStore';
 import { parseGPX } from '../../utils/gpxParser';
 import { useRef, useState } from 'react';
+import { FolderSimple } from '@phosphor-icons/react';
 
 const ACCEPTED = '.gpx';
 
@@ -48,7 +49,7 @@ export default function UploadZone() {
         style={{ display: 'none' }}
         onChange={(e) => processFiles(e.target.files)}
       />
-      <span className="upload-zone__icon">📂</span>
+      <span className="upload-zone__icon"><FolderSimple size={32} weight="thin" /></span>
       <span className="upload-zone__text">
         {dragging ? 'Drop GPX files here' : 'Upload GPX tracks'}
       </span>

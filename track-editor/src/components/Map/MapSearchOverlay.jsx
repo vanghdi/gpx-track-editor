@@ -1,11 +1,28 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useMap } from 'react-leaflet';
+import {
+  MagnifyingGlass, MapPin, CaretDown, X,
+  ForkKnife, BeerStein, ShoppingCart, Tent, Bed,
+  Binoculars, Tree, Drop, Wrench,
+} from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { searchLocations } from '../../utils/geocodingService';
 import { searchPoiNearTrack, POI_CATEGORIES } from '../../utils/overpassService';
 import { sampleTrackInView } from '../../utils/trackSampler';
 
 const DEBOUNCE_MS = 350;
+
+const POI_ICON_MAP = {
+  ForkKnife,
+  Beer: BeerStein,
+  ShoppingCart,
+  Tent,
+  Bed,
+  Binoculars,
+  PicnicTable: Tree,
+  Drop,
+  Wrench,
+};
 
 /** Rendered INSIDE MapContainer — populates the shared mapRef so the overlay can pan the map */
 export function MapSearchCenterer({ mapRef }) {
@@ -204,7 +221,7 @@ export default function MapSearchOverlay({ mapRef }) {
           title="Search location"
           aria-label="Open search"
         >
-          🔍
+          <MagnifyingGlass size={18} weight="bold" />
           {(locationMarkers.length > 0 || poiMarkers.length > 0) && (
             <span className="map-search-badge">{locationMarkers.length + poiMarkers.length}</span>
           )}
@@ -216,7 +233,7 @@ export default function MapSearchOverlay({ mapRef }) {
         <>
           <div className="map-search-row">
             <div className="map-search-input-wrap">
-              <span className="map-search-icon" aria-hidden>🔍</span>
+              <span className="map-search-icon" aria-hidden><MagnifyingGlass size={14} weight="bold" /></span>
               <input
                 ref={inputRef}
                 className="map-search-input"
@@ -236,7 +253,8 @@ export default function MapSearchOverlay({ mapRef }) {
               title="Pinned locations"
               onClick={() => setShowPinPanel((v) => !v)}
             >
-              📍{locationMarkers.length > 0 && (
+              <MapPin size={15} weight={showPinPanel ? 'fill' : 'regular'} />
+              {locationMarkers.length > 0 && (
                 <span className="map-search-badge">{locationMarkers.length}</span>
               )}
             </button>
@@ -246,7 +264,7 @@ export default function MapSearchOverlay({ mapRef }) {
               title={panelExpanded ? 'Hide POI search' : 'Find POIs near track'}
               onClick={() => { setPanelExpanded((v) => !v); setPoiError(null); }}
             >
-              {panelExpanded ? '⌃' : '⌄'}
+              <CaretDown size={14} weight="bold" style={{ transform: panelExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
             </button>
 
             <button
@@ -255,11 +273,17 @@ export default function MapSearchOverlay({ mapRef }) {
               onClick={() => { setExpanded(false); setQuery(''); setResults([]); setOpen(false); setShowPinPanel(false); setPanelExpanded(false); setPreviewMarker(null); }}
               aria-label="Close search"
             >
-              ✕
+              <X size={14} weight="bold" />
             </button>
           </div>
 
-          {error && <p className="map-search-error">{error}</p>}
+          {/* Error popup */}
+          {error && (
+            <div className="map-search-error-popup">
+              <span className="map-search-error-msg">{error}</span>
+              <button className="map-search-error-close" onClick={() => setError(null)}><X size={11} weight="bold" /></button>
+            </div>
+          )}
 
           {open && results.length > 0 && (
             <ul className="map-search-results" role="listbox" onMouseLeave={handleResultLeave}>
@@ -284,7 +308,9 @@ export default function MapSearchOverlay({ mapRef }) {
                     <button className="map-search-pin-label" onClick={() => handlePinClick(m)} title={m.label}>
                       {shortLabel(m.label)}
                     </button>
-                    <button className="map-search-pin-remove" title="Remove" onClick={() => removeLocationMarker(m.id)}>×</button>
+                    <button className="map-search-pin-remove" title="Remove" onClick={() => removeLocationMarker(m.id)}>
+                      <X size={11} weight="bold" />
+                    </button>
                   </li>
                 ))
               )}
@@ -295,15 +321,18 @@ export default function MapSearchOverlay({ mapRef }) {
             <div className="poi-panel">
               <div className="poi-panel-label">Find near track</div>
               <div className="poi-categories">
-                {POI_CATEGORIES.map((cat) => (
-                  <button key={cat.key}
-                    className={`poi-category-btn${selectedCategories.includes(cat.key) ? ' selected' : ''}`}
-                    title={cat.label} onClick={() => toggleCategory(cat.key)}
-                  >
-                    <span className="poi-cat-icon">{cat.icon}</span>
-                    <span className="poi-cat-label">{cat.label}</span>
-                  </button>
-                ))}
+                {POI_CATEGORIES.map((cat) => {
+                  const IconComp = POI_ICON_MAP[cat.iconName];
+                  return (
+                    <button key={cat.key}
+                      className={`poi-category-btn${selectedCategories.includes(cat.key) ? ' selected' : ''}`}
+                      title={cat.label} onClick={() => toggleCategory(cat.key)}
+                    >
+                      {IconComp && <span className="poi-cat-icon"><IconComp size={16} weight={selectedCategories.includes(cat.key) ? 'fill' : 'regular'} /></span>}
+                      <span className="poi-cat-label">{cat.label}</span>
+                    </button>
+                  );
+                })}
               </div>
               <div className="poi-controls">
                 <div className="poi-radius-wrap">
@@ -317,11 +346,19 @@ export default function MapSearchOverlay({ mapRef }) {
                   {poiLoading ? <span className="map-search-spinner" aria-hidden /> : 'Search'}
                 </button>
               </div>
-              {poiError && <p className="map-search-error">{poiError}</p>}
+              {/* POI error popup */}
+              {poiError && (
+                <div className="map-search-error-popup">
+                  <span className="map-search-error-msg">{poiError}</span>
+                  <button className="map-search-error-close" onClick={() => setPoiError(null)}><X size={11} weight="bold" /></button>
+                </div>
+              )}
               {poiMarkers.length > 0 && (
                 <div className="poi-results-row">
                   <span className="poi-results-count">{poiMarkers.length} result{poiMarkers.length !== 1 ? 's' : ''}</span>
-                  <button className="poi-clear-btn" onClick={() => { clearPoiMarkers(); setPoiError(null); }}>✕ Clear</button>
+                  <button className="poi-clear-btn" onClick={() => { clearPoiMarkers(); setPoiError(null); }}>
+                    <X size={11} weight="bold" /> Clear
+                  </button>
                 </div>
               )}
             </div>

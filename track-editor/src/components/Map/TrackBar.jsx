@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X, ArrowLeft, ArrowRight, ArrowsLeftRight } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { getRoute } from '../../utils/routingService';
 import { pathDistanceKm } from '../../utils/geoUtils';
@@ -96,7 +97,7 @@ function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
           aria-label={`Remove segment ${index + 1}`}
           title="Remove segment"
         >
-          ✕
+          <X size={10} weight="bold" />
         </button>
       )}
     </div>
@@ -183,7 +184,7 @@ export default function TrackBar() {
           title="Move selected segment left"
           aria-label="Move left"
         >
-          ←
+          <ArrowLeft size={16} weight="bold" />
         </button>
       )}
 
@@ -224,7 +225,7 @@ export default function TrackBar() {
           title="Move selected segment right"
           aria-label="Move right"
         >
-          →
+          <ArrowRight size={16} weight="bold" />
         </button>
       )}
 
@@ -236,7 +237,7 @@ export default function TrackBar() {
           title={reorderMode ? 'Done reordering' : 'Reorder segments'}
           aria-label="Toggle reorder mode"
         >
-          ⇄
+          <ArrowsLeftRight size={16} weight="bold" />
         </button>
       )}
 

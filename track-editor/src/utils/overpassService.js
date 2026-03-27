@@ -1,24 +1,124 @@
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 
+/**
+ * Each group has a `tags` array so a single toggle queries multiple OSM tag combos.
+ * `icon` (emoji) is kept for Leaflet HTML popups (plain HTML context).
+ * `iconName` is the Phosphor icon name used in the React category picker.
+ */
 export const POI_CATEGORIES = [
-  { key: 'bar',                     label: 'Bar',        icon: '🍺', tagKey: 'amenity', tagValue: 'bar' },
-  { key: 'pub',                     label: 'Pub',        icon: '🍻', tagKey: 'amenity', tagValue: 'pub' },
-  { key: 'restaurant',              label: 'Restaurant', icon: '🍽', tagKey: 'amenity', tagValue: 'restaurant' },
-  { key: 'cafe',                    label: 'Café',       icon: '☕', tagKey: 'amenity', tagValue: 'cafe' },
-  { key: 'supermarket',             label: 'Supermarket',icon: '🛒', tagKey: 'shop',    tagValue: 'supermarket' },
-  { key: 'camp_site',               label: 'Campsite',   icon: '🏕', tagKey: 'tourism', tagValue: 'camp_site' },
-  { key: 'viewpoint',               label: 'Viewpoint',  icon: '🔭', tagKey: 'tourism', tagValue: 'viewpoint' },
-  { key: 'drinking_water',          label: 'Water',      icon: '💧', tagKey: 'amenity', tagValue: 'drinking_water' },
-  { key: 'bicycle_repair_station',  label: 'Bike Repair',icon: '🔧', tagKey: 'amenity', tagValue: 'bicycle_repair_station' },
-  { key: 'picnic_site',             label: 'Picnic',     icon: '🧺', tagKey: 'tourism', tagValue: 'picnic_site' },
+  {
+    key: 'food',
+    label: 'Food',
+    icon: '🍽',
+    iconName: 'ForkKnife',
+    tags: [
+      { tagKey: 'amenity', tagValue: 'restaurant' },
+      { tagKey: 'amenity', tagValue: 'fast_food' },
+      { tagKey: 'amenity', tagValue: 'bistro' },
+    ],
+  },
+  {
+    key: 'drinks',
+    label: 'Drinks',
+    icon: '🍺',
+    iconName: 'Beer',
+    tags: [
+      { tagKey: 'amenity', tagValue: 'bar' },
+      { tagKey: 'amenity', tagValue: 'pub' },
+      { tagKey: 'amenity', tagValue: 'cafe' },
+      { tagKey: 'amenity', tagValue: 'biergarten' },
+    ],
+  },
+  {
+    key: 'supermarket',
+    label: 'Supermarket',
+    icon: '🛒',
+    iconName: 'ShoppingCart',
+    tags: [
+      { tagKey: 'shop', tagValue: 'supermarket' },
+      { tagKey: 'shop', tagValue: 'convenience' },
+    ],
+  },
+  {
+    key: 'campsite',
+    label: 'Campsite',
+    icon: '⛺',
+    iconName: 'Tent',
+    tags: [
+      { tagKey: 'tourism', tagValue: 'camp_site' },
+      { tagKey: 'tourism', tagValue: 'caravan_site' },
+    ],
+  },
+  {
+    key: 'lodging',
+    label: 'Hotels',
+    icon: '🏨',
+    iconName: 'Bed',
+    tags: [
+      { tagKey: 'tourism', tagValue: 'hotel' },
+      { tagKey: 'tourism', tagValue: 'hostel' },
+      { tagKey: 'tourism', tagValue: 'motel' },
+      { tagKey: 'tourism', tagValue: 'guest_house' },
+      { tagKey: 'tourism', tagValue: 'chalet' },
+    ],
+  },
+  {
+    key: 'viewpoint',
+    label: 'Viewpoint',
+    icon: '🔭',
+    iconName: 'Binoculars',
+    tags: [
+      { tagKey: 'tourism', tagValue: 'viewpoint' },
+    ],
+  },
+  {
+    key: 'bench_picnic',
+    label: 'Bench / Picnic',
+    icon: '🌿',
+    iconName: 'PicnicTable',
+    tags: [
+      { tagKey: 'amenity', tagValue: 'bench' },
+      { tagKey: 'tourism', tagValue: 'picnic_site' },
+    ],
+  },
+  {
+    key: 'water',
+    label: 'Water',
+    icon: '💧',
+    iconName: 'Drop',
+    tags: [
+      { tagKey: 'amenity', tagValue: 'drinking_water' },
+    ],
+  },
+  {
+    key: 'bike_repair',
+    label: 'Bike Repair',
+    icon: '🔧',
+    iconName: 'Wrench',
+    tags: [
+      { tagKey: 'amenity', tagValue: 'bicycle_repair_station' },
+    ],
+  },
 ];
 
 function buildQuery(categories, radiusM, coords) {
   const coordStr = coords.flat().join(',');
-  const filters = categories.map(
-    (cat) => `  nwr["${cat.tagKey}"="${cat.tagValue}"](around:${radiusM},${coordStr});`
+  const filters = categories.flatMap((cat) =>
+    cat.tags.map(
+      ({ tagKey, tagValue }) =>
+        `  nwr["${tagKey}"="${tagValue}"](around:${radiusM},${coordStr});`
+    )
   );
-  return `[out:json][timeout:15];\n(\n${filters.join('\n')}\n);\nout center tags;`;
+  return `[out:json][timeout:25];\n(\n${filters.join('\n')}\n);\nout center tags;`;
+}
+
+function findCategory(tags) {
+  for (const cat of POI_CATEGORIES) {
+    for (const { tagKey, tagValue } of cat.tags) {
+      if (tags[tagKey] === tagValue) return cat;
+    }
+  }
+  return null;
 }
 
 function parseResults(elements) {
@@ -28,7 +128,7 @@ function parseResults(elements) {
     if (lat == null || lng == null) return null;
 
     const tags = el.tags || {};
-    const category = POI_CATEGORIES.find((c) => tags[c.tagKey] === c.tagValue);
+    const category = findCategory(tags);
 
     return {
       id: crypto.randomUUID(),
@@ -63,8 +163,9 @@ export async function searchPoiNearTrack({ categories, radiusM, points, signal }
     signal,
   });
 
-  if (!res.ok) throw new Error(`Overpass returned ${res.status}`);
+  if (!res.ok) throw new Error(`Overpass API error: HTTP ${res.status}`);
 
   const data = await res.json();
   return parseResults(data.elements ?? []);
 }
+

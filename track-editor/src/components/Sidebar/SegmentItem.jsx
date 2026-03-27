@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { getRoute } from '../../utils/routingService';
 import { pathDistanceKm } from '../../utils/geoUtils';
@@ -69,7 +70,7 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
           title="Remove segment"
           onClick={() => removeSegment(segment.id)}
         >
-          ✕
+          <X size={12} weight="bold" />
         </button>
       </div>
 

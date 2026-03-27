@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ArrowCounterClockwise, ArrowClockwise } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { useUndoRedo } from '../../hooks/useUndoRedo';
 import { pathDistanceKm } from '../../utils/geoUtils';
@@ -53,7 +54,7 @@ export default function MapChrome({ activeLayer, onToggleLayer }) {
           title="Undo (⌘Z)"
           aria-label="Undo"
         >
-          ↩
+          <ArrowCounterClockwise size={16} weight="bold" />
         </button>
         <button
           className="map-chrome__btn"
@@ -62,7 +63,7 @@ export default function MapChrome({ activeLayer, onToggleLayer }) {
           title="Redo (⌘⇧Z)"
           aria-label="Redo"
         >
-          ↪
+          <ArrowClockwise size={16} weight="bold" />
         </button>
         {segments.length > 0 && (
           <span className="map-chrome__total" title="Total track length">

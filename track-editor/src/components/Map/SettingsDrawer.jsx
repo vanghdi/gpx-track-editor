@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { X, ArrowUp, CaretUp, CaretDown } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { useTheme } from '../../hooks/useTheme';
 import { parseGPX } from '../../utils/gpxParser';
@@ -106,7 +107,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
             aria-label="Close settings"
             title="Close"
           >
-            ✕
+            <X size={16} weight="bold" />
           </button>
         </div>
 
@@ -195,7 +196,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
                 title="Upload GPX files"
                 aria-label="Upload GPX files"
               >
-                ↑
+                <ArrowUp size={16} weight="bold" />
               </button>
               <span className="upload-header__label">
                 GPX Tracks
@@ -209,7 +210,7 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
                 aria-expanded={tracksOpen}
                 aria-label="Toggle track list"
               >
-                {tracksOpen ? '▲' : '▼'}
+                {tracksOpen ? <CaretUp size={12} weight="bold" /> : <CaretDown size={12} weight="bold" />}
               </button>
             </div>
 

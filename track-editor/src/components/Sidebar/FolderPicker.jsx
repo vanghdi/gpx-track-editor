@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FolderSimple, Check, X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 
 /**
@@ -31,7 +32,7 @@ export default function FolderPicker({ onConfirm, onCancel }) {
           className={`folder-picker-option${selected === null ? ' active' : ''}`}
           onClick={() => setSelected(null)}
         >
-          📂 Root
+          <FolderSimple size={13} weight="regular" /> Root
         </button>
         {folders.map((f) => (
           <button
@@ -39,7 +40,7 @@ export default function FolderPicker({ onConfirm, onCancel }) {
             className={`folder-picker-option${selected === f.id ? ' active' : ''}`}
             onClick={() => setSelected(f.id)}
           >
-            📁 {f.name}
+            <FolderSimple size={13} weight="regular" /> {f.name}
           </button>
         ))}
       </div>
@@ -54,8 +55,8 @@ export default function FolderPicker({ onConfirm, onCancel }) {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') setCreating(false); }}
           />
-          <button className="folder-icon-btn" onClick={handleCreate}>✓</button>
-          <button className="folder-icon-btn" onClick={() => setCreating(false)}>✕</button>
+          <button className="folder-icon-btn" onClick={handleCreate}><Check size={13} weight="bold" /></button>
+          <button className="folder-icon-btn" onClick={() => setCreating(false)}><X size={12} weight="bold" /></button>
         </div>
       ) : (
         <button className="folder-picker-new-btn" onClick={() => setCreating(true)}>

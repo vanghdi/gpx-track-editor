@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CaretUp, CaretDown, Check } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 
 export default function ApiKeySettings() {
@@ -27,7 +28,7 @@ export default function ApiKeySettings() {
           {!apiKey && <span style={{ color: 'var(--coral)', marginRight: 6 }}>⚠</span>}
           API Key
         </span>
-        <span className="settings-toggle__chevron">{open ? '▲' : '▼'}</span>
+        <span className="settings-toggle__chevron">{open ? <CaretUp size={12} weight="bold" /> : <CaretDown size={12} weight="bold" />}</span>
       </button>
 
       {!apiKey && (
@@ -67,7 +68,7 @@ export default function ApiKeySettings() {
               Save
             </button>
           </div>
-          {saved && <span className="settings-saved">✓ Saved</span>}
+          {saved && <span className="settings-saved"><Check size={11} weight="bold" /> Saved</span>}
         </div>
       )}
     </div>
