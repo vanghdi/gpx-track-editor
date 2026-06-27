@@ -60,6 +60,27 @@ export function pathDistanceKm(points) {
   return total / 1000;
 }
 
+/**
+ * Build the point list for a GPX slice while preserving the user's chosen direction.
+ * Same-track slices can run forward or backward; cross-track slices run from the
+ * chosen start point to the chosen end point.
+ */
+export function buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx) {
+  if (!startTrack) return [];
+
+  if (startTrack.id === endTrack?.id) {
+    const reversed = startIdx > endIdx;
+    const [from, to] = reversed ? [endIdx, startIdx] : [startIdx, endIdx];
+    const points = startTrack.points.slice(from, to + 1);
+    return reversed ? [...points].reverse() : points;
+  }
+
+  return [
+    ...startTrack.points.slice(startIdx),
+    ...(endTrack ? endTrack.points.slice(0, endIdx + 1) : []),
+  ];
+}
+
 export function areConnected(a, b) {
   return haversineDistance(a, b) < 20;
 }

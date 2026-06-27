@@ -1,6 +1,6 @@
 import { useMapEvents } from 'react-leaflet';
 import useTrackStore from '../../store/trackStore';
-import { snapToNearest } from '../../utils/geoUtils';
+import { buildGpxSlicePoints, snapToNearest } from '../../utils/geoUtils';
 import { getRoute } from '../../utils/routingService';
 
 export default function PointSelector() {
@@ -61,21 +61,9 @@ export default function PointSelector() {
         const start = selectionStart;
         const end = snapped;
 
-        const sourceTrack = uploadedTracks.find((t) => t.id === start.trackId);
-        if (!sourceTrack) { cancelSelection(); return; }
-
-        let points;
-        if (start.trackId === end.trackId) {
-          const reversed = start.idx > end.idx;
-          const [from, to] = reversed ? [end.idx, start.idx] : [start.idx, end.idx];
-          points = sourceTrack.points.slice(from, to + 1);
-          if (reversed) points = [...points].reverse();
-        } else {
-          const destTrack = uploadedTracks.find((t) => t.id === end.trackId);
-          const slice1 = sourceTrack.points.slice(start.idx);
-          const slice2 = destTrack ? destTrack.points.slice(0, end.idx + 1) : [];
-          points = [...slice1, ...slice2];
-        }
+        const startTrack = uploadedTracks.find((t) => t.id === start.trackId);
+        const endTrack = uploadedTracks.find((t) => t.id === end.trackId);
+        const points = buildGpxSlicePoints(startTrack, start.idx, endTrack, end.idx);
 
         if (points.length < 2) { cancelSelection(); return; }
 

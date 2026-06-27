@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
-import { areConnected } from '../utils/geoUtils';
+import { areConnected, buildGpxSlicePoints } from '../utils/geoUtils';
 
 // Distinct colours for uploaded tracks — high-contrast on OSM light basemap
 const TRACK_COLORS = [
@@ -267,18 +267,7 @@ const useTrackStore = create(
       const uploadedTracks = state.uploadedTracks;
       const startTrack = uploadedTracks.find((t) => t.id === startTrackId);
       const endTrack = uploadedTracks.find((t) => t.id === endTrackId);
-      if (!startTrack) return state;
-
-      let points;
-      if (startTrackId === endTrackId) {
-        const [from, to] = startIdx <= endIdx ? [startIdx, endIdx] : [endIdx, startIdx];
-        points = startTrack.points.slice(from, to + 1);
-      } else {
-        points = [
-          ...startTrack.points.slice(startIdx),
-          ...(endTrack ? endTrack.points.slice(0, endIdx + 1) : []),
-        ];
-      }
+      const points = buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx);
       if (points.length < 2) return state;
 
       return {
