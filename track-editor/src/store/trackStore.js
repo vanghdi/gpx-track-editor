@@ -107,7 +107,7 @@ const useTrackStore = create(
           name,
           color: nextColor(),
           points,
-          visible: false,
+          visible: true,
           folderId: folderId ?? null,
         },
       ],
@@ -150,7 +150,7 @@ const useTrackStore = create(
           name,
           color: nextColor(),
           points,
-          visible: false,
+          visible: true,
           folderId,
         });
       });
@@ -420,6 +420,12 @@ const useTrackStore = create(
   routingProfile: 'cycling-mountain',
   setRoutingProfile: (profile) => set({ routingProfile: profile }),
 
+  // ── Elevation profile ───────────────────────────────────────────────────────
+  elevationProfileVisible: false,
+  elevationProfileSize: 'regular',
+  setElevationProfileVisible: (visible) => set({ elevationProfileVisible: visible }),
+  setElevationProfileSize: (size) => set({ elevationProfileSize: size }),
+
   // ── Selection mode for picking segment endpoints (transient) ─────────────────
   selectionMode: null,
   selectionStart: null,
@@ -542,6 +548,8 @@ const useTrackStore = create(
       uploadedTracks: data.uploadedTracks ?? [],
       workingTrack: data.workingTrack ?? { name: 'My Track', segments: [] },
       routingProfile: data.routingProfile ?? 'cycling-mountain',
+      elevationProfileVisible: data.elevationProfileVisible ?? false,
+      elevationProfileSize: data.elevationProfileSize ?? 'regular',
       _wt_history: [],
       _wt_future: [],
       selectionMode: null,

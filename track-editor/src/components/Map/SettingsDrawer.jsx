@@ -22,9 +22,13 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
   const workingTrack = useTrackStore((s) => s.workingTrack);
   const folders = useTrackStore((s) => s.folders);
   const routingProfile = useTrackStore((s) => s.routingProfile);
+  const elevationProfileVisible = useTrackStore((s) => s.elevationProfileVisible);
+  const elevationProfileSize = useTrackStore((s) => s.elevationProfileSize);
   const workingTrackName = useTrackStore((s) => s.workingTrack.name);
   const setWorkingTrackName = useTrackStore((s) => s.setWorkingTrackName);
   const setRoutingProfile = useTrackStore((s) => s.setRoutingProfile);
+  const setElevationProfileVisible = useTrackStore((s) => s.setElevationProfileVisible);
+  const setElevationProfileSize = useTrackStore((s) => s.setElevationProfileSize);
   const isDownloadReady = useTrackStore((s) => s.isDownloadReady);
   const { theme, toggle: toggleTheme } = useTheme();
 
@@ -222,7 +226,14 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
   const projectInputRef = useRef(null);
 
   const handleSaveProject = () => {
-    const data = { folders, uploadedTracks, workingTrack, routingProfile };
+    const data = {
+      folders,
+      uploadedTracks,
+      workingTrack,
+      routingProfile,
+      elevationProfileVisible,
+      elevationProfileSize,
+    };
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -342,6 +353,39 @@ export default function SettingsDrawer({ open, onClose, activeLayer, onToggleLay
               Google Maps
             </button>
           </div>
+
+          <div className="drawer-section drawer-section--row">
+            <span className="drawer-label">Elevation graph</span>
+            <button
+              className={`btn btn--sm ${elevationProfileVisible ? 'btn--accent' : 'btn--ghost'}`}
+              onClick={() => setElevationProfileVisible(!elevationProfileVisible)}
+              title={elevationProfileVisible ? 'Hide elevation graph' : 'Show elevation graph'}
+            >
+              {elevationProfileVisible ? 'Shown' : 'Hidden'}
+            </button>
+          </div>
+
+          {elevationProfileVisible && (
+            <div className="drawer-section">
+              <label className="drawer-label">Graph height</label>
+              <div className="drawer-chip-row">
+                {[
+                  ['compact', 'Low'],
+                  ['regular', 'Med'],
+                  ['tall', 'Tall'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    className={`drawer-chip${elevationProfileSize === value ? ' drawer-chip--active' : ''}`}
+                    onClick={() => setElevationProfileSize(value)}
+                    title={`${label} elevation graph height`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* GPX Tracks */}
           <div className="drawer-section section--upload">

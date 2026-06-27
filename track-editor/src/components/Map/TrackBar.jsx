@@ -118,7 +118,6 @@ function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
       onMouseEnter={() => !reorderMode && setHoveredSegmentId(segment.id)}
       onMouseLeave={() => !reorderMode && setHoveredSegmentId(null)}
     >
-      <span className="track-bar__pill-num">#{index + 1}</span>
       <span className="track-bar__pill-dist">{dist}</span>
       {canReverseDirection && (
         <button

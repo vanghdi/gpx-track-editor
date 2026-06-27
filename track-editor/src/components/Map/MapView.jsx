@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, ScaleControl, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import TrackLayer from './TrackLayer';
 import WorkingTrackLayer from './WorkingTrackLayer';
@@ -121,6 +121,7 @@ export default function MapView() {
         zoomControl={true}
       >
         <TileLayer key={activeLayer} url={layer.url} attribution={layer.attribution} />
+        <ScaleControl position="bottomleft" imperial={false} />
         <TrackLayer />
         <WorkingTrackLayer />
         <PointSelector />

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import MapView from './components/Map/MapView';
+import ElevationProfile from './components/Map/ElevationProfile';
 import TrackBar from './components/Map/TrackBar';
 import useTrackStore from './store/trackStore';
 
@@ -26,6 +27,7 @@ export default function App() {
       <div className="map-container">
         <MapView />
       </div>
+      <ElevationProfile />
       <TrackBar />
     </div>
   );

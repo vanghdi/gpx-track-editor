@@ -39,6 +39,27 @@
   /* Mobile panel */
   --panel-collapsed-h: 72px;
 
+  /* Elevation profile */
+  --elevation-surface: linear-gradient(180deg, rgba(26, 34, 50, 0.96), rgba(12, 16, 24, 0.88));
+  --elevation-glow: rgba(115, 184, 191, 0.16);
+  --elevation-border: rgba(115, 184, 191, 0.22);
+  --elevation-grid: rgba(221, 228, 239, 0.12);
+  --elevation-band-gpx: rgba(217, 72, 84, 0.08);
+  --elevation-band-routed: rgba(217, 137, 67, 0.09);
+  --elevation-band-active: rgba(115, 184, 191, 0.14);
+  --elevation-fill-strong: rgba(115, 184, 191, 0.34);
+  --elevation-fill-soft: rgba(115, 184, 191, 0.02);
+  --elevation-gap-stroke: rgba(217, 137, 67, 0.3);
+  --elevation-missing-stroke: rgba(221, 228, 239, 0.18);
+  --elevation-label-bg: rgba(12, 16, 24, 0.68);
+  --elevation-label-border: rgba(115, 184, 191, 0.18);
+  --elevation-grade-flat: #59616c;
+  --elevation-grade-green: #39b54a;
+  --elevation-grade-yellow: #f1c40f;
+  --elevation-grade-orange: #f08a24;
+  --elevation-grade-red: #e03c31;
+  --elevation-grade-brown: #6e4423;
+
   /* Fonts */
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-ui:      'Barlow Condensed', 'Barlow', sans-serif;
@@ -69,6 +90,20 @@
 
   /* Teal: darken for readability on warm parchment */
   --teal-light:   #1e727c;
+
+  --elevation-surface: linear-gradient(180deg, rgba(232, 221, 200, 0.96), rgba(212, 197, 160, 0.9));
+  --elevation-glow: rgba(70, 48, 20, 0.08);
+  --elevation-border: rgba(70, 48, 20, 0.2);
+  --elevation-grid: rgba(38, 26, 8, 0.12);
+  --elevation-band-gpx: rgba(217, 72, 84, 0.09);
+  --elevation-band-routed: rgba(217, 137, 67, 0.11);
+  --elevation-band-active: rgba(70, 48, 20, 0.12);
+  --elevation-fill-strong: rgba(70, 48, 20, 0.2);
+  --elevation-fill-soft: rgba(70, 48, 20, 0.02);
+  --elevation-gap-stroke: rgba(217, 137, 67, 0.38);
+  --elevation-missing-stroke: rgba(38, 26, 8, 0.16);
+  --elevation-label-bg: rgba(240, 232, 216, 0.82);
+  --elevation-label-border: rgba(70, 48, 20, 0.18);
 }
 
 /* Light-mode sidebar texture: warm sepia grid instead of teal */
@@ -1745,6 +1780,41 @@ body {
 }
 .drawer-section--row .drawer-label { margin-bottom: 0; }
 
+.drawer-chip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.drawer-chip {
+  min-width: 56px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-bright);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.drawer-chip:hover {
+  border-color: var(--teal);
+  background: var(--teal-dim);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.drawer-chip--active {
+  border-color: rgba(217, 137, 67, 0.35);
+  background: linear-gradient(135deg, rgba(217, 137, 67, 0.22), rgba(115, 184, 191, 0.16));
+  color: var(--text);
+}
+
 /* GPX Upload header */
 .upload-header {
   display: flex;
@@ -1816,6 +1886,187 @@ body {
 /* ═══════════════════════════════════════════════════════════════
    TRACK BAR  — Horizontal segment bar at the bottom
    ═══════════════════════════════════════════════════════════════ */
+
+.elevation-profile {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  z-index: 995;
+  height: var(--elevation-profile-height, 136px);
+  padding: 8px 10px 10px;
+  border: 1px solid var(--elevation-border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, var(--elevation-glow), transparent 30%),
+    var(--elevation-surface);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.38);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.elevation-profile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.04), transparent 16%, transparent 84%, rgba(255,255,255,0.03)),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 64px,
+      color-mix(in srgb, var(--teal) 10%, transparent) 64px,
+      color-mix(in srgb, var(--teal) 10%, transparent) 65px
+    );
+}
+
+.elevation-profile__canvas {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+.elevation-profile__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--elevation-label-border);
+  border-radius: 999px;
+  background: var(--elevation-label-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.elevation-profile__close:hover {
+  color: var(--text);
+  border-color: var(--teal);
+  background: rgba(69, 156, 165, 0.18);
+  transform: translateY(-1px);
+}
+
+.elevation-profile__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.elevation-profile__gridline {
+  stroke: var(--elevation-grid);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+}
+
+.elevation-profile__segment-band {
+  fill: var(--elevation-band-gpx);
+}
+
+.elevation-profile__segment-band--routed {
+  fill: var(--elevation-band-routed);
+}
+
+.elevation-profile__segment-band--active {
+  fill: var(--elevation-band-active);
+}
+
+.elevation-profile__gap-band {
+  opacity: 0.9;
+}
+
+.elevation-profile__missing-band {
+  opacity: 0.7;
+}
+
+.elevation-profile__area {
+  fill: url(#elevationAreaGradient);
+}
+
+.elevation-profile__line {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.elevation-profile__line--flat { stroke: var(--elevation-grade-flat); }
+.elevation-profile__line--green { stroke: var(--elevation-grade-green); }
+.elevation-profile__line--yellow { stroke: var(--elevation-grade-yellow); }
+.elevation-profile__line--orange { stroke: var(--elevation-grade-orange); }
+.elevation-profile__line--red { stroke: var(--elevation-grade-red); }
+.elevation-profile__line--brown { stroke: var(--elevation-grade-brown); }
+
+.elevation-profile__labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.elevation-profile__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.elevation-profile__segment-label,
+.elevation-profile__gap-label {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.elevation-profile__segment-label {
+  min-width: 30px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--elevation-label-border);
+  background: var(--elevation-label-bg);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.elevation-profile__segment-label:hover,
+.elevation-profile__segment-label--active {
+  color: var(--text);
+  border-color: var(--teal);
+  background: rgba(69, 156, 165, 0.18);
+  transform: translateX(-50%) translateY(-1px);
+}
+
+.elevation-profile__gap-label {
+  width: 100%;
+  top: 8px;
+  transform: none;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(217, 137, 67, 0.7);
+}
 
 .track-bar {
   position: absolute;
