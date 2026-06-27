@@ -1,0 +1,2956 @@
+{
+  "responseKeys": [
+    "200",
+    "400",
+    "404",
+    "405",
+    "413",
+    "500",
+    "501",
+    "503"
+  ],
+  "responses": {
+    "200": {
+      "description": "Standard response for successfully processed requests. Returns GeoJSON. The decoded values of the extra information can be found [here](https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/).\n",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A GeoJSON 'FeatureCollection' representing the routes returned from the request"
+        },
+        "bbox": {
+          "type": "array",
+          "description": "Bounding box that covers all returned routes",
+          "example": [
+            49.414057,
+            8.680894,
+            49.420514,
+            8.690123
+          ],
+          "items": {
+            "type": "number",
+            "description": "Bounding box that covers all returned routes",
+            "format": "double"
+          }
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "bbox": {
+                "type": "array",
+                "description": "Bounding box that covers all returned routes",
+                "example": [
+                  49.414057,
+                  8.680894,
+                  49.420514,
+                  8.690123
+                ],
+                "items": {
+                  "type": "number",
+                  "description": "Bounding box that covers all returned routes",
+                  "format": "double"
+                }
+              },
+              "type": {
+                "type": "string",
+                "description": "A GeoJSON 'Feature' representing a single route returned from the request"
+              },
+              "properties": {
+                "type": "object",
+                "properties": {
+                  "ascent": {
+                    "type": "number",
+                    "description": "Total ascent in meters.",
+                    "format": "double",
+                    "example": 166.3,
+                    "x-validWhen": {
+                      "ref": "elevation",
+                      "value": true
+                    }
+                  },
+                  "descent": {
+                    "type": "number",
+                    "description": "Total descent in meters.",
+                    "format": "double",
+                    "example": 201.3,
+                    "x-validWhen": {
+                      "ref": "elevation",
+                      "value": true
+                    }
+                  },
+                  "fare": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "segments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "distance": {
+                          "type": "number",
+                          "description": "Contains the distance of the segment in specified units.",
+                          "format": "double",
+                          "example": 253
+                        },
+                        "duration": {
+                          "type": "number",
+                          "description": "Contains the duration of the segment in seconds.",
+                          "format": "double",
+                          "example": 37.7
+                        },
+                        "steps": {
+                          "type": "array",
+                          "description": "List containing the specific steps the segment consists of.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "distance": {
+                                "type": "number",
+                                "description": "The distance for the step in metres.",
+                                "format": "double",
+                                "example": 245
+                              },
+                              "duration": {
+                                "type": "number",
+                                "description": "The duration for the step in seconds.",
+                                "format": "double",
+                                "example": 96.2
+                              },
+                              "type": {
+                                "type": "integer",
+                                "description": "The [instruction](https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/instruction-types) action for symbolisation purposes.",
+                                "format": "int32",
+                                "example": 1
+                              },
+                              "instruction": {
+                                "type": "string",
+                                "description": "The routing instruction text for the step.",
+                                "example": "Turn right onto Berliner Straße"
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "The name of the next street.",
+                                "example": "Berliner Straße"
+                              },
+                              "exit_number": {
+                                "type": "integer",
+                                "description": "Only for roundabouts. Contains the number of the exit to take.",
+                                "format": "int32",
+                                "example": 2
+                              },
+                              "exit_bearings": {
+                                "type": "array",
+                                "description": "Contains the bearing of the entrance and all passed exits in a roundabout.",
+                                "example": [
+                                  10,
+                                  45,
+                                  60
+                                ],
+                                "items": {
+                                  "type": "integer",
+                                  "description": "Contains the bearing of the entrance and all passed exits in a roundabout.",
+                                  "format": "int32",
+                                  "x-validWhen": {
+                                    "ref": "roundabout_exits",
+                                    "value": true
+                                  }
+                                },
+                                "x-validWhen": {
+                                  "ref": "roundabout_exits",
+                                  "value": true
+                                }
+                              },
+                              "way_points": {
+                                "type": "array",
+                                "description": "List containing the indices of the steps start- and endpoint corresponding to the *geometry*.",
+                                "example": [
+                                  45,
+                                  48
+                                ],
+                                "items": {
+                                  "type": "integer",
+                                  "description": "List containing the indices of the steps start- and endpoint corresponding to the *geometry*.",
+                                  "format": "int32"
+                                }
+                              },
+                              "maneuver": {
+                                "type": "object",
+                                "properties": {
+                                  "location": {
+                                    "type": "array",
+                                    "description": "The coordinate of the point where a maneuver takes place.",
+                                    "example": [
+                                      8.678962,
+                                      49.407819
+                                    ],
+                                    "items": {
+                                      "type": "number",
+                                      "description": "The coordinate of the point where a maneuver takes place.",
+                                      "format": "double"
+                                    }
+                                  },
+                                  "bearing_before": {
+                                    "type": "integer",
+                                    "description": "The azimuth angle (in degrees) of the direction right before the maneuver.",
+                                    "format": "int32",
+                                    "example": 24
+                                  },
+                                  "bearing_after": {
+                                    "type": "integer",
+                                    "description": "The azimuth angle (in degrees) of the direction right after the maneuver.",
+                                    "format": "int32",
+                                    "example": 96
+                                  }
+                                },
+                                "description": "Maneuver object of the step",
+                                "x-validWhen": {
+                                  "ref": "maneuvers",
+                                  "value": true
+                                }
+                              }
+                            },
+                            "description": "Step of a route segment"
+                          }
+                        },
+                        "detourfactor": {
+                          "type": "number",
+                          "description": "Contains the deviation compared to a straight line that would have the factor `1`. Double the Distance would be a `2`.",
+                          "format": "double",
+                          "example": 0.5,
+                          "x-validWhen": {
+                            "ref": "attributes",
+                            "valueContains": "detourfactor"
+                          }
+                        },
+                        "percentage": {
+                          "type": "number",
+                          "description": "Contains the proportion of the route in percent.",
+                          "format": "double",
+                          "example": 43.2,
+                          "x-validWhen": {
+                            "ref": "attributes",
+                            "valueContains": "percentage"
+                          }
+                        },
+                        "avgspeed": {
+                          "type": "number",
+                          "description": "Contains the average speed of this segment in km/h.",
+                          "format": "double",
+                          "example": 56.3,
+                          "x-validWhen": {
+                            "ref": "attributes",
+                            "valueContains": "avgspeed"
+                          }
+                        },
+                        "ascent": {
+                          "type": "number",
+                          "description": " Contains ascent of this segment in metres.",
+                          "format": "double",
+                          "example": 56.3,
+                          "x-validWhen": {
+                            "ref": "elevation",
+                            "value": true
+                          }
+                        },
+                        "descent": {
+                          "type": "number",
+                          "description": "Contains descent of this segment in metres.",
+                          "format": "double",
+                          "example": 45.2
+                        }
+                      },
+                      "description": "List containing the segments and its correspoding steps which make up the route."
+                    }
+                  },
+                  "extras": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "values": {
+                          "type": "array",
+                          "description": "A list of values representing a section of the route. The individual values are: \nValue 1: Indice of the staring point of the geometry for this section,\nValue 2: Indice of the end point of the geoemetry for this sections,\nValue 3: [Value](https://GIScience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) assigned to this section.",
+                          "example": [
+                            [
+                              0,
+                              3,
+                              26
+                            ],
+                            [
+                              3,
+                              10,
+                              12
+                            ]
+                          ],
+                          "items": {
+                            "type": "array",
+                            "description": "A list of values representing a section of the route. The individual values are: \nValue 1: Indice of the staring point of the geometry for this section,\nValue 2: Indice of the end point of the geoemetry for this sections,\nValue 3: [Value](https://GIScience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) assigned to this section.",
+                            "example": [
+                              [
+                                0,
+                                3,
+                                26
+                              ],
+                              [
+                                3,
+                                10,
+                                12
+                              ]
+                            ],
+                            "items": {
+                              "type": "integer",
+                              "description": "A list of values representing a section of the route. The individual values are: \nValue 1: Indice of the staring point of the geometry for this section,\nValue 2: Indice of the end point of the geoemetry for this sections,\nValue 3: [Value](https://GIScience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) assigned to this section.",
+                              "format": "int64"
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "array",
+                          "description": "List representing the summary of the extra info items.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "number",
+                                "description": "[Value](https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) of a info category.",
+                                "format": "double",
+                                "example": 5
+                              },
+                              "distance": {
+                                "type": "number",
+                                "description": "Cumulative distance of this value.",
+                                "format": "double",
+                                "example": 123.1
+                              },
+                              "amount": {
+                                "type": "number",
+                                "description": "Category percentage of the entire route.",
+                                "format": "double",
+                                "example": 23.8
+                              }
+                            },
+                            "description": "List representing the summary of the extra info items."
+                          }
+                        }
+                      },
+                      "description": "An object representing one of the extra info items requested"
+                    },
+                    "description": "Map of extra information items requested for the route, keyed by their type."
+                  },
+                  "warnings": {
+                    "type": "array",
+                    "description": "List of warnings that have been generated for the route. Each warning object contains the following keys: \"code\" (integer) - numeric warning code, and \"message\" (string) - human-readable message.",
+                    "example": [
+                      {
+                        "code": 1,
+                        "message": "There may be restrictions on some roads"
+                      }
+                    ],
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer",
+                          "description": "Identification code for the warning",
+                          "format": "int32",
+                          "example": 1
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "The message associated with the warning",
+                          "example": "This route may go over restricted roads"
+                        }
+                      },
+                      "description": "Informs about possible difficulties like access restrictions on the generated route. Generates a corresponding `extras` object with the affected segments.",
+                      "example": [
+                        {
+                          "code": 1,
+                          "message": "There may be restrictions on some roads"
+                        }
+                      ]
+                    }
+                  },
+                  "departure": {
+                    "type": "string",
+                    "description": "Departure date and time",
+                    "format": "date-time",
+                    "example": "2020-01-31T12:45:00+01:00",
+                    "x-validWhen": {
+                      "ref": "departure",
+                      "value": true
+                    }
+                  },
+                  "arrival": {
+                    "type": "string",
+                    "description": "Arrival date and time",
+                    "format": "date-time",
+                    "example": "2020-01-31T13:15:00+01:00",
+                    "x-validWhen": {
+                      "ref": "arrival",
+                      "value": true
+                    }
+                  },
+                  "way_points": {
+                    "type": "array",
+                    "description": "List containing the indices of way points corresponding to the *geometry*.",
+                    "example": [
+                      0,
+                      23
+                    ],
+                    "items": {
+                      "type": "integer",
+                      "description": "List containing the indices of way points corresponding to the *geometry*.",
+                      "format": "int32"
+                    }
+                  },
+                  "summary": {
+                    "type": "object",
+                    "properties": {
+                      "distance": {
+                        "type": "number",
+                        "description": "Total route distance in specified units.",
+                        "format": "double",
+                        "example": 12.6
+                      },
+                      "duration": {
+                        "type": "number",
+                        "description": "Total duration in seconds.",
+                        "format": "double",
+                        "example": 604
+                      },
+                      "ascent": {
+                        "type": "number",
+                        "description": "Total ascent in meters.",
+                        "format": "double",
+                        "example": 166.3,
+                        "x-validWhen": {
+                          "ref": "elevation",
+                          "value": true
+                        }
+                      },
+                      "descent": {
+                        "type": "number",
+                        "description": "Total descent in meters.",
+                        "format": "double",
+                        "example": 201.3,
+                        "x-validWhen": {
+                          "ref": "elevation",
+                          "value": true
+                        }
+                      },
+                      "fare": {
+                        "type": "integer",
+                        "format": "int32"
+                      }
+                    },
+                    "description": "Route statistics such as distance and duration."
+                  }
+                },
+                "description": "Contains routing segments with navigation steps, overall route summary, waypoint indices, and related metadata."
+              },
+              "geometry": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The geometry type",
+                    "example": "LineString"
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "properties": {
+                      "empty": {
+                        "type": "boolean"
+                      },
+                      "first": {
+                        "type": "object"
+                      },
+                      "last": {
+                        "type": "object"
+                      }
+                    },
+                    "description": "The coordinates array for the geometry",
+                    "items": {
+                      "type": "object",
+                      "description": "The coordinates array for the geometry"
+                    }
+                  }
+                },
+                "description": "The geometry of the route. For GeoJSON route responses this is a JSON LineString."
+              }
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "ID of the request (as passed in by the query)",
+              "example": "request123"
+            },
+            "attribution": {
+              "type": "string",
+              "description": "Copyright and attribution information",
+              "example": "openrouteservice.org | OpenStreetMap contributors"
+            },
+            "service": {
+              "type": "string",
+              "description": "The service that was requested",
+              "example": "routing"
+            },
+            "timestamp": {
+              "type": "integer",
+              "description": "Time that the request was made (UNIX Epoch time)",
+              "format": "int64",
+              "example": 1549549847974
+            },
+            "query": {
+              "title": "Directions Service",
+              "required": [
+                "coordinates"
+              ],
+              "type": "object",
+              "properties": {
+                "coordinates": {
+                  "type": "array",
+                  "description": "The waypoints to use for the route as an array of `longitude/latitude` pairs in WGS 84 (EPSG:4326)",
+                  "example": [
+                    [
+                      8.681495,
+                      49.41461
+                    ],
+                    [
+                      8.686507,
+                      49.41943
+                    ],
+                    [
+                      8.687872,
+                      49.420318
+                    ]
+                  ],
+                  "items": {
+                    "type": "array",
+                    "description": "The waypoints to use for the route as an array of `longitude/latitude` pairs in WGS 84 (EPSG:4326)",
+                    "example": [
+                      [
+                        8.681495,
+                        49.41461
+                      ],
+                      [
+                        8.686507,
+                        49.41943
+                      ],
+                      [
+                        8.687872,
+                        49.420318
+                      ]
+                    ],
+                    "items": {
+                      "type": "number",
+                      "description": "The waypoints to use for the route as an array of `longitude/latitude` pairs in WGS 84 (EPSG:4326)",
+                      "format": "double"
+                    }
+                  }
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Arbitrary identification string of the request reflected in the meta information.",
+                  "example": "my_request"
+                },
+                "preference": {
+                  "type": "string",
+                  "description": "Specifies the route preference",
+                  "enum": [
+                    "fastest",
+                    "shortest",
+                    "recommended",
+                    "custom"
+                  ],
+                  "default": "recommended"
+                },
+                "units": {
+                  "type": "string",
+                  "description": "Specifies the distance unit.",
+                  "enum": [
+                    "m",
+                    "km",
+                    "mi"
+                  ],
+                  "default": "m"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "Language for the route instructions.",
+                  "enum": [
+                    "cs",
+                    "cs-cz",
+                    "da",
+                    "dk-da",
+                    "de",
+                    "de-de",
+                    "en",
+                    "en-us",
+                    "eo",
+                    "eo-eo",
+                    "es",
+                    "es-es",
+                    "eu",
+                    "eu-es",
+                    "fi",
+                    "fi-fi",
+                    "fr",
+                    "fr-fr",
+                    "gr",
+                    "gr-gr",
+                    "he",
+                    "he-il",
+                    "hu",
+                    "hu-hu",
+                    "id",
+                    "id-id",
+                    "it",
+                    "it-it",
+                    "ja",
+                    "ja-jp",
+                    "lv",
+                    "lv-lv",
+                    "lt",
+                    "lt-lt",
+                    "ne",
+                    "ne-np",
+                    "nl",
+                    "nl-nl",
+                    "nb",
+                    "nb-no",
+                    "pl",
+                    "pl-pl",
+                    "pt",
+                    "pt-pt",
+                    "ro",
+                    "ro-ro",
+                    "ru",
+                    "ru-ru",
+                    "tr",
+                    "tr-tr",
+                    "ua",
+                    "ua-ua",
+                    "vi",
+                    "vi-vn",
+                    "zh",
+                    "zh-cn"
+                  ],
+                  "default": "en"
+                },
+                "geometry": {
+                  "type": "boolean",
+                  "description": "Specifies whether to return geometry. ",
+                  "default": true,
+                  "x-validWhen": {
+                    "ref": "format",
+                    "value": [
+                      "json"
+                    ]
+                  }
+                },
+                "instructions": {
+                  "type": "boolean",
+                  "description": "Specifies whether to return instructions.",
+                  "default": true
+                },
+                "instructions_format": {
+                  "type": "string",
+                  "description": "Select html for more verbose instructions.",
+                  "enum": [
+                    "html",
+                    "text"
+                  ],
+                  "default": "text"
+                },
+                "roundabout_exits": {
+                  "type": "boolean",
+                  "description": "Provides bearings of the entrance and all passed roundabout exits. Adds the `exit_bearings` array to the step object in the response. ",
+                  "default": false
+                },
+                "attributes": {
+                  "type": "array",
+                  "description": "List of route attributes",
+                  "example": [
+                    "avgspeed",
+                    "percentage"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "description": "List of route attributes",
+                    "example": "[\"avgspeed\",\"percentage\"]",
+                    "enum": [
+                      "avgspeed",
+                      "detourfactor",
+                      "percentage"
+                    ]
+                  }
+                },
+                "maneuvers": {
+                  "type": "boolean",
+                  "description": "Specifies whether the maneuver object is included into the step object or not. ",
+                  "default": false
+                },
+                "radiuses": {
+                  "type": "array",
+                  "description": "A list of maximum distances (measured in metres) that limit the search of nearby road segments to every given waypoint. The values must be greater than 0, the value of -1 specifies using the maximum possible search radius. The number of radiuses correspond to the number of waypoints. If only a single value is given, it will be applied to all waypoints.",
+                  "example": [
+                    200,
+                    -1,
+                    30
+                  ],
+                  "items": {
+                    "type": "number",
+                    "description": "A list of maximum distances (measured in metres) that limit the search of nearby road segments to every given waypoint. The values must be greater than 0, the value of -1 specifies using the maximum possible search radius. The number of radiuses correspond to the number of waypoints. If only a single value is given, it will be applied to all waypoints.",
+                    "format": "double"
+                  }
+                },
+                "bearings": {
+                  "type": "array",
+                  "description": "Specifies a list of pairs (bearings and deviations) to filter the segments of the road network a waypoint can snap to.\n\"For example `bearings=[[45,10],[120,20]]`.\n\"Each pair is a comma-separated list that can consist of one or two float values, where the first value is the bearing and the second one is the allowed deviation from the bearing.\n\"The bearing can take values between `0` and `360` clockwise from true north. If the deviation is not set, then the default value of `100` degrees is used.\n\"The number of pairs must correspond to the number of waypoints.\n\"The number of bearings corresponds to the length of waypoints-1 or waypoints. If the bearing information for the last waypoint is given, then this will control the sector from which the destination waypoint may be reached.\n\"You can skip a bearing for a certain waypoint by passing an empty value for an array, e.g. `[30,20],[],[40,20]`.",
+                  "example": [
+                    [
+                      30,
+                      20
+                    ],
+                    [],
+                    [
+                      40,
+                      20
+                    ]
+                  ],
+                  "items": {
+                    "type": "array",
+                    "description": "Specifies a list of pairs (bearings and deviations) to filter the segments of the road network a waypoint can snap to.\n\"For example `bearings=[[45,10],[120,20]]`.\n\"Each pair is a comma-separated list that can consist of one or two float values, where the first value is the bearing and the second one is the allowed deviation from the bearing.\n\"The bearing can take values between `0` and `360` clockwise from true north. If the deviation is not set, then the default value of `100` degrees is used.\n\"The number of pairs must correspond to the number of waypoints.\n\"The number of bearings corresponds to the length of waypoints-1 or waypoints. If the bearing information for the last waypoint is given, then this will control the sector from which the destination waypoint may be reached.\n\"You can skip a bearing for a certain waypoint by passing an empty value for an array, e.g. `[30,20],[],[40,20]`.",
+                    "example": [
+                      [
+                        30,
+                        20
+                      ],
+                      [],
+                      [
+                        40,
+                        20
+                      ]
+                    ],
+                    "items": {
+                      "type": "number",
+                      "description": "Specifies a list of pairs (bearings and deviations) to filter the segments of the road network a waypoint can snap to.\n\"For example `bearings=[[45,10],[120,20]]`.\n\"Each pair is a comma-separated list that can consist of one or two float values, where the first value is the bearing and the second one is the allowed deviation from the bearing.\n\"The bearing can take values between `0` and `360` clockwise from true north. If the deviation is not set, then the default value of `100` degrees is used.\n\"The number of pairs must correspond to the number of waypoints.\n\"The number of bearings corresponds to the length of waypoints-1 or waypoints. If the bearing information for the last waypoint is given, then this will control the sector from which the destination waypoint may be reached.\n\"You can skip a bearing for a certain waypoint by passing an empty value for an array, e.g. `[30,20],[],[40,20]`.",
+                      "format": "double",
+                      "x-validWhen": {
+                        "ref": "profile",
+                        "value": "cycling-*"
+                      }
+                    },
+                    "x-validWhen": {
+                      "ref": "profile",
+                      "value": "cycling-*"
+                    }
+                  },
+                  "x-validWhen": {
+                    "ref": "profile",
+                    "value": "cycling-*"
+                  }
+                },
+                "continue_straight": {
+                  "type": "boolean",
+                  "description": "Forces the route to keep going straight at waypoints restricting uturns there even if it would be faster.",
+                  "default": false
+                },
+                "elevation": {
+                  "type": "boolean",
+                  "description": "Specifies whether to return elevation values for points. Please note that elevation also gets encoded for json response encoded polyline.",
+                  "example": false
+                },
+                "extra_info": {
+                  "type": "array",
+                  "description": "The extra info items to include in the response",
+                  "example": [
+                    "waytype",
+                    "surface"
+                  ],
+                  "items": {
+                    "type": "string",
+                    "description": "Specify which extra info items to include in the response",
+                    "example": "[\"waytype\",\"surface\"]",
+                    "enum": [
+                      "steepness",
+                      "suitability",
+                      "surface",
+                      "waycategory",
+                      "waytype",
+                      "tollways",
+                      "traildifficulty",
+                      "osmid",
+                      "roadaccessrestrictions",
+                      "countryinfo",
+                      "green",
+                      "noise",
+                      "csv",
+                      "shadow"
+                    ]
+                  }
+                },
+                "options": {
+                  "title": "Route Options",
+                  "type": "object",
+                  "properties": {
+                    "avoid_features": {
+                      "type": "array",
+                      "description": "List of features to avoid. ",
+                      "example": [
+                        "highways"
+                      ],
+                      "items": {
+                        "type": "string",
+                        "description": "Definition of the features to be avoided.",
+                        "example": "[\"highways\"]",
+                        "enum": [
+                          "highways",
+                          "tollways",
+                          "ferries",
+                          "fords",
+                          "steps"
+                        ],
+                        "x-itemRestrictions": {
+                          "ref": "profile",
+                          "itemsWhen": {
+                            "driving-*": [
+                              "highways",
+                              "tollways",
+                              "ferries"
+                            ],
+                            "cycling-*": [
+                              "ferries",
+                              "steps",
+                              "fords"
+                            ],
+                            "foot-*": [
+                              "ferries",
+                              "fords",
+                              "steps"
+                            ],
+                            "wheelchair": [
+                              "ferries",
+                              "steps"
+                            ]
+                          }
+                        }
+                      },
+                      "x-itemRestrictions": {
+                        "ref": "profile",
+                        "itemsWhen": {
+                          "driving-*": [
+                            "highways",
+                            "tollways",
+                            "ferries"
+                          ],
+                          "cycling-*": [
+                            "ferries",
+                            "steps",
+                            "fords"
+                          ],
+                          "foot-*": [
+                            "ferries",
+                            "fords",
+                            "steps"
+                          ],
+                          "wheelchair": [
+                            "ferries",
+                            "steps"
+                          ]
+                        }
+                      }
+                    },
+                    "avoid_borders": {
+                      "type": "string",
+                      "description": "Specify which type of border crossing to avoid",
+                      "example": "controlled",
+                      "enum": [
+                        "all",
+                        "controlled",
+                        "none"
+                      ],
+                      "x-validWhen": {
+                        "ref": "profile",
+                        "value": "driving-*"
+                      }
+                    },
+                    "avoid_countries": {
+                      "type": "array",
+                      "description": "List of countries to exclude from matrix with `driving-*` profiles. Can be used together with `'avoid_borders': 'controlled'`. `[ 11, 193 ]` would exclude Austria and Switzerland. List of countries and application examples can be found [here](https://giscience.github.io/openrouteservice/technical-details/country-list). Also, ISO standard country codes cna be used in place of the numerical ids, for example, DE or DEU for Germany. ",
+                      "example": [
+                        11,
+                        193
+                      ],
+                      "items": {
+                        "type": "string",
+                        "description": "List of countries to exclude from matrix with `driving-*` profiles. Can be used together with `'avoid_borders': 'controlled'`. `[ 11, 193 ]` would exclude Austria and Switzerland. List of countries and application examples can be found [here](https://giscience.github.io/openrouteservice/technical-details/country-list). Also, ISO standard country codes cna be used in place of the numerical ids, for example, DE or DEU for Germany. ",
+                        "example": "[11,193]",
+                        "x-validWhen": {
+                          "ref": "profile",
+                          "value": "driving-*"
+                        }
+                      },
+                      "x-validWhen": {
+                        "ref": "profile",
+                        "value": "driving-*"
+                      }
+                    },
+                    "vehicle_type": {
+                      "type": "string",
+                      "description": "Definition of the vehicle type.",
+                      "enum": [
+                        "hgv",
+                        "bus",
+                        "agricultural",
+                        "delivery",
+                        "forestry",
+                        "goods",
+                        "unknown"
+                      ],
+                      "default": "hgv",
+                      "x-validWhen": {
+                        "ref": "profile",
+                        "value": "driving-hgv"
+                      }
+                    },
+                    "profile_params": {
+                      "title": "Profile Parameters",
+                      "type": "object",
+                      "properties": {
+                        "weightings": {
+                          "title": "Profile Weightings",
+                          "type": "object",
+                          "properties": {
+                            "steepness_difficulty": {
+                              "type": "integer",
+                              "description": "Specifies the fitness level for `cycling-*` profiles.\n\n level: 0 = Novice, 1 = Moderate, 2 = Amateur, 3 = Pro. The prefered gradient increases with level.",
+                              "format": "int32",
+                              "example": 2,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "cycling-*"
+                              }
+                            },
+                            "green": {
+                              "type": "number",
+                              "description": "Specifies the Green factor for `foot-*` profiles.\n\nfactor: Multiplication factor range from 0 to 1. 0 is the green routing base factor without multiplying it by the manual factor and is already different from normal routing. 1 will prefer ways through green areas over a shorter route.",
+                              "format": "float",
+                              "example": 0.4,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "foot-*"
+                              }
+                            },
+                            "quiet": {
+                              "type": "number",
+                              "description": "Specifies the Quiet factor for foot-* profiles.\n\nfactor: Multiplication factor range from 0 to 1. 0 is the quiet routing base factor without multiplying it by the manual factor and is already different from normal routing. 1 will prefer quiet ways over a shorter route.",
+                              "format": "float",
+                              "example": 0.8,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "foot-*"
+                              }
+                            },
+                            "shadow": {
+                              "type": "number",
+                              "description": "Specifies the shadow factor for `foot-*` profiles.\n\nfactor: Multiplication factor range from 0 to 1. 0 is the shadow routing base factor without multiplying it by the manual factor and is already different from normal routing. 1 will prefer ways through shadow areas over a shorter route.",
+                              "format": "float",
+                              "example": 0.4,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "foot-*"
+                              }
+                            }
+                          },
+                          "description": "Describe additional weightings to be applied to edges on the routing."
+                        },
+                        "restrictions": {
+                          "type": "object",
+                          "properties": {
+                            "length": {
+                              "type": "number",
+                              "description": "Length restriction in metres.",
+                              "format": "float",
+                              "example": 8.4,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "driving-hgv"
+                              }
+                            },
+                            "width": {
+                              "type": "number",
+                              "description": "Width restriction in metres.",
+                              "format": "float",
+                              "example": 5.6,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "driving-hgv"
+                              }
+                            },
+                            "height": {
+                              "type": "number",
+                              "description": "Height restriction in metres. ",
+                              "format": "float",
+                              "example": 4.2,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "driving-hgv"
+                              }
+                            },
+                            "axleload": {
+                              "type": "number",
+                              "description": "Axleload restriction in tons.",
+                              "format": "float",
+                              "example": 50,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "driving-hgv"
+                              }
+                            },
+                            "weight": {
+                              "type": "number",
+                              "description": "Weight restriction in tons. ",
+                              "format": "float",
+                              "example": 40,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "driving-hgv"
+                              }
+                            },
+                            "hazmat": {
+                              "type": "boolean",
+                              "description": "Specifies whether to use appropriate routing for delivering hazardous goods and avoiding water protected areas. Default is `false`. ",
+                              "default": false,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "driving-hgv"
+                              }
+                            },
+                            "surface_type": {
+                              "type": "string",
+                              "description": "Specifies the minimum surface type. Default is `sett`. ",
+                              "default": "sett",
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "wheelchair"
+                              }
+                            },
+                            "track_type": {
+                              "type": "string",
+                              "description": "Specifies the minimum grade of the route. Default is `grade1`. ",
+                              "default": "grade1",
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "wheelchair"
+                              }
+                            },
+                            "smoothness_type": {
+                              "type": "string",
+                              "description": "Specifies the minimum smoothness of the route. Default is `good`.",
+                              "enum": [
+                                "excellent",
+                                "good",
+                                "intermediate",
+                                "bad",
+                                "very_bad",
+                                "horrible",
+                                "very_horrible",
+                                "impassable"
+                              ],
+                              "default": "good",
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "wheelchair"
+                              }
+                            },
+                            "maximum_sloped_kerb": {
+                              "type": "number",
+                              "description": "Specifies the maximum height of the sloped curb in metres. Values are `0.03`, `0.06` (default), `0.1`.",
+                              "format": "float",
+                              "default": 0.6,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "wheelchair"
+                              }
+                            },
+                            "maximum_incline": {
+                              "type": "integer",
+                              "description": "Specifies the maximum incline as a percentage. `3`, `6` (default), `10`, `15.",
+                              "format": "int32",
+                              "default": 6,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "wheelchair"
+                              }
+                            },
+                            "minimum_width": {
+                              "type": "number",
+                              "description": "Specifies the minimum width of the footway in metres.",
+                              "format": "float",
+                              "example": 2.5,
+                              "x-validWhen": {
+                                "ref": "profile",
+                                "value": "wheelchair"
+                              }
+                            }
+                          },
+                          "description": "Describe restrictions to be applied to edges on the routing. any edges that do not match these restrictions are not traversed."
+                        },
+                        "surface_quality_known": {
+                          "type": "boolean",
+                          "description": "Specifies whether to enforce that only ways with known information on surface quality be taken into account - default false",
+                          "example": true,
+                          "x-validWhen": {
+                            "ref": "profile",
+                            "value": "wheelchair"
+                          }
+                        },
+                        "allow_unsuitable": {
+                          "type": "boolean",
+                          "description": "Specifies if ways that might not be suitable (e.g. unknown pedestrian usage) should be included in finding routes - default false",
+                          "example": true,
+                          "x-validWhen": {
+                            "ref": "profile",
+                            "value": "wheelchair"
+                          }
+                        }
+                      },
+                      "description": "Specifies additional routing parameters. For all profiles except `driving-car`.",
+                      "x-validWhen": {
+                        "valueNot": "driving-car",
+                        "ref": "profile"
+                      }
+                    },
+                    "avoid_polygons": {
+                      "type": "object",
+                      "properties": {
+                        "empty": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "description": "Comprises areas to be avoided for the route. Formatted in GeoJSON as either a Polygon or Multipolygon object."
+                      },
+                      "description": "Comprises areas to be avoided for the route. Formatted in GeoJSON as either a Polygon or Multipolygon object."
+                    },
+                    "round_trip": {
+                      "title": "Round Trip Route Options",
+                      "type": "object",
+                      "properties": {
+                        "length": {
+                          "type": "number",
+                          "description": "The target length of the route in `m` (note that this is a preferred value, but results may be different).",
+                          "format": "float",
+                          "example": 10000
+                        },
+                        "points": {
+                          "type": "integer",
+                          "description": "The number of points to use on the route. Larger values create more circular routes.",
+                          "format": "int32",
+                          "example": 5
+                        },
+                        "seed": {
+                          "type": "integer",
+                          "description": "A seed to use for adding randomisation to the overall direction of the generated route",
+                          "format": "int64",
+                          "example": 1
+                        }
+                      },
+                      "description": "Specifies the parameters for generating round trip routes.",
+                      "example": {
+                        "length": 10000,
+                        "points": 5
+                      }
+                    }
+                  },
+                  "description": "Advanced options for routing",
+                  "example": {
+                    "avoid_borders": "controlled"
+                  }
+                },
+                "suppress_warnings": {
+                  "type": "boolean",
+                  "description": "Suppress warning messages in the response",
+                  "example": false
+                },
+                "geometry_simplify": {
+                  "type": "boolean",
+                  "description": "Specifies whether to simplify the geometry. Simplify geometry cannot be applied to routes with more than **one segment** and when `extra_info` is required.",
+                  "default": false
+                },
+                "skip_segments": {
+                  "type": "array",
+                  "description": "Specifies the segments that should be skipped in the route calculation. A segment is the connection between two given coordinates and the counting starts with 1 for the connection between the first and second coordinate.",
+                  "example": [
+                    2,
+                    4
+                  ],
+                  "items": {
+                    "type": "integer",
+                    "description": "Specifies the segments that should be skipped in the route calculation. A segment is the connection between two given coordinates and the counting starts with 1 for the connection between the first and second coordinate.",
+                    "format": "int32"
+                  }
+                },
+                "alternative_routes": {
+                  "title": "Alternative Routes",
+                  "type": "object",
+                  "properties": {
+                    "target_count": {
+                      "type": "integer",
+                      "description": "Target number of alternative routes to compute. Service returns up to this number of routes that fulfill the share-factor and weight-factor constraints.",
+                      "format": "int32",
+                      "example": 2
+                    },
+                    "weight_factor": {
+                      "type": "number",
+                      "description": "Maximum factor by which route weight may diverge from the optimal route. The default value of 1.4 means alternatives can be up to 1.4 times longer (costly) than the optimal route.",
+                      "format": "double",
+                      "example": 1.4
+                    },
+                    "share_factor": {
+                      "type": "number",
+                      "description": "Maximum fraction of the route that alternatives may share with the optimal route. The default value of 0.6 means alternatives can share up to 60% of path segments with the optimal route.",
+                      "format": "double",
+                      "example": 0.6
+                    }
+                  },
+                  "description": "Specifies whether alternative routes are computed, and parameters for the algorithm determining suitable alternatives.",
+                  "example": {
+                    "target_count": 2,
+                    "weight_factor": 1.6
+                  }
+                },
+                "maximum_speed": {
+                  "type": "number",
+                  "description": "The maximum speed specified by user.",
+                  "format": "double",
+                  "example": 90,
+                  "x-validWhen": {
+                    "ref": "profile",
+                    "value": "driving-*"
+                  }
+                },
+                "schedule": {
+                  "type": "boolean",
+                  "description": "If true, return a public transport schedule starting at <departure> for the next <schedule_duration> minutes.",
+                  "example": true,
+                  "default": false,
+                  "x-validWhen": {
+                    "ref": "profile",
+                    "value": "public-transport"
+                  }
+                },
+                "schedule_duration": {
+                  "type": "string",
+                  "example": "PT2H30M"
+                },
+                "schedule_rows": {
+                  "type": "integer",
+                  "description": "The maximum amount of entries that should be returned when requesting a schedule.",
+                  "format": "int32",
+                  "example": 3,
+                  "x-validWhen": {
+                    "ref": "schedule",
+                    "value": true
+                  }
+                },
+                "walking_time": {
+                  "type": "string",
+                  "example": "PT2H30M"
+                },
+                "ignore_transfers": {
+                  "type": "boolean",
+                  "description": "Specifies if transfers as criterion should be ignored.",
+                  "example": true,
+                  "default": false,
+                  "x-validWhen": {
+                    "ref": "profile",
+                    "value": "public-transport"
+                  }
+                },
+                "custom_model": {
+                  "type": "object",
+                  "properties": {
+                    "distance_influence": {
+                      "type": "number",
+                      "description": "Parameter determining the influence of the distance between two points on the edge weight",
+                      "format": "double"
+                    },
+                    "speed": {
+                      "type": "array",
+                      "description": "Array of objects describing rules to be applied to the speed of edges",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "enum": [
+                              "IF",
+                              "ELSEIF",
+                              "ELSE"
+                            ]
+                          },
+                          "condition": {
+                            "type": "string"
+                          },
+                          "operation": {
+                            "type": "string",
+                            "enum": [
+                              "MULTIPLY",
+                              "LIMIT"
+                            ]
+                          },
+                          "value": {
+                            "type": "number",
+                            "format": "double"
+                          }
+                        },
+                        "description": "Array of objects describing rules to be applied to the priority of edges"
+                      }
+                    },
+                    "priority": {
+                      "type": "array",
+                      "description": "Array of objects describing rules to be applied to the priority of edges",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "keyword": {
+                            "type": "string",
+                            "enum": [
+                              "IF",
+                              "ELSEIF",
+                              "ELSE"
+                            ]
+                          },
+                          "condition": {
+                            "type": "string"
+                          },
+                          "operation": {
+                            "type": "string",
+                            "enum": [
+                              "MULTIPLY",
+                              "LIMIT"
+                            ]
+                          },
+                          "value": {
+                            "type": "number",
+                            "format": "double"
+                          }
+                        },
+                        "description": "Array of objects describing rules to be applied to the priority of edges"
+                      }
+                    },
+                    "areas": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "GeoJSON type",
+                            "default": "Feature"
+                          },
+                          "geometry": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "description": "GeoJSON type",
+                                "default": "Polygon"
+                              },
+                              "coordinates": {
+                                "type": "array",
+                                "items": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "number",
+                                      "format": "double"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "description": "Feature geometry"
+                          }
+                        },
+                        "description": "Map of areas that can be referenced in speed and priority rules"
+                      },
+                      "description": "Map of areas that can be referenced in speed and priority rules"
+                    }
+                  },
+                  "description": "Specifies custom model for weighting.",
+                  "example": {
+                    "speed": [
+                      {
+                        "if": true,
+                        "limit_to": 100
+                      }
+                    ],
+                    "priority": [
+                      {
+                        "if": "road_class == MOTORWAY",
+                        "multiply_by": 0
+                      }
+                    ],
+                    "distance_influence": 100
+                  }
+                }
+              },
+              "description": "The JSON body request sent to the routing service which defines options and parameters regarding the route to generate."
+            },
+            "engine": {
+              "type": "object",
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "description": "The backend version of the openrouteservice that was queried",
+                  "example": "8.0"
+                },
+                "build_date": {
+                  "type": "string",
+                  "description": "The date that the service was last updated",
+                  "example": "2019-02-07T14:28:11Z"
+                },
+                "graph_date": {
+                  "type": "string",
+                  "description": "The date that the graph data was last updated",
+                  "example": "2019-02-07T14:28:11Z"
+                },
+                "osm_date": {
+                  "type": "string",
+                  "description": "Timestamp of the OSM data the graph was built from",
+                  "example": "2019-02-07T14:28:11Z"
+                }
+              },
+              "description": "Information about the openrouteservice engine used"
+            },
+            "system_message": {
+              "type": "string",
+              "description": "System message",
+              "example": "A message string configured in the service"
+            }
+          },
+          "description": "Information about the request"
+        }
+      },
+      "example": {
+        "body": {
+          "type": {
+            "type": "string",
+            "description": "A GeoJSON 'FeatureCollection' representing the routes returned from the request"
+          },
+          "bbox": {
+            "type": "array",
+            "description": "Bounding box that covers all returned routes",
+            "example": [
+              49.414057,
+              8.680894,
+              49.420514,
+              8.690123
+            ],
+            "items": {
+              "type": "number",
+              "description": "Bounding box that covers all returned routes",
+              "format": "double"
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "bbox": {
+                  "type": "array",
+                  "description": "Bounding box that covers all returned routes",
+                  "example": [
+                    49.414057,
+                    8.680894,
+                    49.420514,
+                    8.690123
+                  ],
+                  "items": {
+                    "type": "number",
+                    "description": "Bounding box that covers all returned routes",
+                    "format": "double"
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "description": "A GeoJSON 'Feature' representing a single route returned from the request"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "ascent": {
+                      "type": "number",
+                      "description": "Total ascent in meters.",
+                      "format": "double",
+                      "example": 166.3,
+                      "x-validWhen": {
+                        "ref": "elevation",
+                        "value": true
+                      }
+                    },
+                    "descent": {
+                      "type": "number",
+                      "description": "Total descent in meters.",
+                      "format": "double",
+                      "example": 201.3,
+                      "x-validWhen": {
+                        "ref": "elevation",
+                        "value": true
+                      }
+                    },
+                    "fare": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "segments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "description": "Contains the distance of the segment in specified units.",
+                            "format": "double",
+                            "example": 253
+                          },
+                          "duration": {
+                            "type": "number",
+                            "description": "Contains the duration of the segment in seconds.",
+                            "format": "double",
+                            "example": 37.7
+                          },
+                          "steps": {
+                            "type": "array",
+                            "description": "List containing the specific steps the segment consists of.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "distance": {
+                                  "type": "number",
+                                  "description": "The distance for the step in metres.",
+                                  "format": "double",
+                                  "example": 245
+                                },
+                                "duration": {
+                                  "type": "number",
+                                  "description": "The duration for the step in seconds.",
+                                  "format": "double",
+                                  "example": 96.2
+                                },
+                                "type": {
+                                  "type": "integer",
+                                  "description": "The [instruction](https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/instruction-types) action for symbolisation purposes.",
+                                  "format": "int32",
+                                  "example": 1
+                                },
+                                "instruction": {
+                                  "type": "string",
+                                  "description": "The routing instruction text for the step.",
+                                  "example": "Turn right onto Berliner Straße"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "The name of the next street.",
+                                  "example": "Berliner Straße"
+                                },
+                                "exit_number": {
+                                  "type": "integer",
+                                  "description": "Only for roundabouts. Contains the number of the exit to take.",
+                                  "format": "int32",
+                                  "example": 2
+                                },
+                                "exit_bearings": {
+                                  "type": "array",
+                                  "description": "Contains the bearing of the entrance and all passed exits in a roundabout.",
+                                  "example": [
+                                    10,
+                                    45,
+                                    60
+                                  ],
+                                  "items": {
+                                    "type": "integer",
+                                    "description": "Contains the bearing of the entrance and all passed exits in a roundabout.",
+                                    "format": "int32",
+                                    "x-validWhen": {
+                                      "ref": "roundabout_exits",
+                                      "value": true
+                                    }
+                                  },
+                                  "x-validWhen": {
+                                    "ref": "roundabout_exits",
+                                    "value": true
+                                  }
+                                },
+                                "way_points": {
+                                  "type": "array",
+                                  "description": "List containing the indices of the steps start- and endpoint corresponding to the *geometry*.",
+                                  "example": [
+                                    45,
+                                    48
+                                  ],
+                                  "items": {
+                                    "type": "integer",
+                                    "description": "List containing the indices of the steps start- and endpoint corresponding to the *geometry*.",
+                                    "format": "int32"
+                                  }
+                                },
+                                "maneuver": {
+                                  "type": "object",
+                                  "properties": {
+                                    "location": {
+                                      "type": "array",
+                                      "description": "The coordinate of the point where a maneuver takes place.",
+                                      "example": [
+                                        8.678962,
+                                        49.407819
+                                      ],
+                                      "items": {
+                                        "type": "number",
+                                        "description": "The coordinate of the point where a maneuver takes place.",
+                                        "format": "double"
+                                      }
+                                    },
+                                    "bearing_before": {
+                                      "type": "integer",
+                                      "description": "The azimuth angle (in degrees) of the direction right before the maneuver.",
+                                      "format": "int32",
+                                      "example": 24
+                                    },
+                                    "bearing_after": {
+                                      "type": "integer",
+                                      "description": "The azimuth angle (in degrees) of the direction right after the maneuver.",
+                                      "format": "int32",
+                                      "example": 96
+                                    }
+                                  },
+                                  "description": "Maneuver object of the step",
+                                  "x-validWhen": {
+                                    "ref": "maneuvers",
+                                    "value": true
+                                  }
+                                }
+                              },
+                              "description": "Step of a route segment"
+                            }
+                          },
+                          "detourfactor": {
+                            "type": "number",
+                            "description": "Contains the deviation compared to a straight line that would have the factor `1`. Double the Distance would be a `2`.",
+                            "format": "double",
+                            "example": 0.5,
+                            "x-validWhen": {
+                              "ref": "attributes",
+                              "valueContains": "detourfactor"
+                            }
+                          },
+                          "percentage": {
+                            "type": "number",
+                            "description": "Contains the proportion of the route in percent.",
+                            "format": "double",
+                            "example": 43.2,
+                            "x-validWhen": {
+                              "ref": "attributes",
+                              "valueContains": "percentage"
+                            }
+                          },
+                          "avgspeed": {
+                            "type": "number",
+                            "description": "Contains the average speed of this segment in km/h.",
+                            "format": "double",
+                            "example": 56.3,
+                            "x-validWhen": {
+                              "ref": "attributes",
+                              "valueContains": "avgspeed"
+                            }
+                          },
+                          "ascent": {
+                            "type": "number",
+                            "description": " Contains ascent of this segment in metres.",
+                            "format": "double",
+                            "example": 56.3,
+                            "x-validWhen": {
+                              "ref": "elevation",
+                              "value": true
+                            }
+                          },
+                          "descent": {
+                            "type": "number",
+                            "description": "Contains descent of this segment in metres.",
+                            "format": "double",
+                            "example": 45.2
+                          }
+                        },
+                        "description": "List containing the segments and its correspoding steps which make up the route."
+                      }
+                    },
+                    "extras": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "values": {
+                            "type": "array",
+                            "description": "A list of values representing a section of the route. The individual values are: \nValue 1: Indice of the staring point of the geometry for this section,\nValue 2: Indice of the end point of the geoemetry for this sections,\nValue 3: [Value](https://GIScience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) assigned to this section.",
+                            "example": [
+                              [
+                                0,
+                                3,
+                                26
+                              ],
+                              [
+                                3,
+                                10,
+                                12
+                              ]
+                            ],
+                            "items": {
+                              "type": "array",
+                              "description": "A list of values representing a section of the route. The individual values are: \nValue 1: Indice of the staring point of the geometry for this section,\nValue 2: Indice of the end point of the geoemetry for this sections,\nValue 3: [Value](https://GIScience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) assigned to this section.",
+                              "example": [
+                                [
+                                  0,
+                                  3,
+                                  26
+                                ],
+                                [
+                                  3,
+                                  10,
+                                  12
+                                ]
+                              ],
+                              "items": {
+                                "type": "integer",
+                                "description": "A list of values representing a section of the route. The individual values are: \nValue 1: Indice of the staring point of the geometry for this section,\nValue 2: Indice of the end point of the geoemetry for this sections,\nValue 3: [Value](https://GIScience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) assigned to this section.",
+                                "format": "int64"
+                              }
+                            }
+                          },
+                          "summary": {
+                            "type": "array",
+                            "description": "List representing the summary of the extra info items.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "value": {
+                                  "type": "number",
+                                  "description": "[Value](https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/) of a info category.",
+                                  "format": "double",
+                                  "example": 5
+                                },
+                                "distance": {
+                                  "type": "number",
+                                  "description": "Cumulative distance of this value.",
+                                  "format": "double",
+                                  "example": 123.1
+                                },
+                                "amount": {
+                                  "type": "number",
+                                  "description": "Category percentage of the entire route.",
+                                  "format": "double",
+                                  "example": 23.8
+                                }
+                              },
+                              "description": "List representing the summary of the extra info items."
+                            }
+                          }
+                        },
+                        "description": "An object representing one of the extra info items requested"
+                      },
+                      "description": "Map of extra information items requested for the route, keyed by their type."
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "description": "List of warnings that have been generated for the route. Each warning object contains the following keys: \"code\" (integer) - numeric warning code, and \"message\" (string) - human-readable message.",
+                      "example": [
+                        {
+                          "code": 1,
+                          "message": "There may be restrictions on some roads"
+                        }
+                      ],
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "integer",
+                            "description": "Identification code for the warning",
+                            "format": "int32",
+                            "example": 1
+                          },
+                          "message": {
+                            "type": "string",
+                            "description": "The message associated with the warning",
+                            "example": "This route may go over restricted roads"
+                          }
+                        },
+                        "description": "Informs about possible difficulties like access restrictions on the generated route. Generates a corresponding `extras` object with the affected segments.",
+                        "example": [
+                          {
+                            "code": 1,
+                            "message": "There may be restrictions on some roads"
+                          }
+                        ]
+                      }
+                    },
+                    "departure": {
+                      "type": "string",
+                      "description": "Departure date and time",
+                      "format": "date-time",
+                      "example": "2020-01-31T12:45:00+01:00",
+                      "x-validWhen": {
+                        "ref": "departure",
+                        "value": true
+                      }
+                    },
+                    "arrival": {
+                      "type": "string",
+                      "description": "Arrival date and time",
+                      "format": "date-time",
+                      "example": "2020-01-31T13:15:00+01:00",
+                      "x-validWhen": {
+                        "ref": "arrival",
+                        "value": true
+                      }
+                    },
+                    "way_points": {
+                      "type": "array",
+                      "description": "List containing the indices of way points corresponding to the *geometry*.",
+                      "example": [
+                        0,
+                        23
+                      ],
+                      "items": {
+                        "type": "integer",
+                        "description": "List containing the indices of way points corresponding to the *geometry*.",
+                        "format": "int32"
+                      }
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "distance": {
+                          "type": "number",
+                          "description": "Total route distance in specified units.",
+                          "format": "double",
+                          "example": 12.6
+                        },
+                        "duration": {
+                          "type": "number",
+                          "description": "Total duration in seconds.",
+                          "format": "double",
+                          "example": 604
+                        },
+                        "ascent": {
+                          "type": "number",
+                          "description": "Total ascent in meters.",
+                          "format": "double",
+                          "example": 166.3,
+                          "x-validWhen": {
+                            "ref": "elevation",
+                            "value": true
+                          }
+                        },
+                        "descent": {
+                          "type": "number",
+                          "description": "Total descent in meters.",
+                          "format": "double",
+                          "example": 201.3,
+                          "x-validWhen": {
+                            "ref": "elevation",
+                            "value": true
+                          }
+                        },
+                        "fare": {
+                          "type": "integer",
+                          "format": "int32"
+                        }
+                      },
+                      "description": "Route statistics such as distance and duration."
+                    }
+                  },
+                  "description": "Contains routing segments with navigation steps, overall route summary, waypoint indices, and related metadata."
+                },
+                "geometry": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "The geometry type",
+                      "example": "LineString"
+                    },
+                    "coordinates": {
+                      "type": "array",
+                      "properties": {
+                        "empty": {
+                          "type": "boolean"
+                        },
+                        "first": {
+                          "type": "object"
+                        },
+                        "last": {
+                          "type": "object"
+                        }
+                      },
+                      "description": "The coordinates array for the geometry",
+                      "items": {
+                        "type": "object",
+                        "description": "The coordinates array for the geometry"
+                      }
+                    }
+                  },
+                  "description": "The geometry of the route. For GeoJSON route responses this is a JSON LineString."
+                }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "ID of the request (as passed in by the query)",
+                "example": "request123"
+              },
+              "attribution": {
+                "type": "string",
+                "description": "Copyright and attribution information",
+                "example": "openrouteservice.org | OpenStreetMap contributors"
+              },
+              "service": {
+                "type": "string",
+                "description": "The service that was requested",
+                "example": "routing"
+              },
+              "timestamp": {
+                "type": "integer",
+                "description": "Time that the request was made (UNIX Epoch time)",
+                "format": "int64",
+                "example": 1549549847974
+              },
+              "query": {
+                "title": "Directions Service",
+                "required": [
+                  "coordinates"
+                ],
+                "type": "object",
+                "properties": {
+                  "coordinates": {
+                    "type": "array",
+                    "description": "The waypoints to use for the route as an array of `longitude/latitude` pairs in WGS 84 (EPSG:4326)",
+                    "example": [
+                      [
+                        8.681495,
+                        49.41461
+                      ],
+                      [
+                        8.686507,
+                        49.41943
+                      ],
+                      [
+                        8.687872,
+                        49.420318
+                      ]
+                    ],
+                    "items": {
+                      "type": "array",
+                      "description": "The waypoints to use for the route as an array of `longitude/latitude` pairs in WGS 84 (EPSG:4326)",
+                      "example": [
+                        [
+                          8.681495,
+                          49.41461
+                        ],
+                        [
+                          8.686507,
+                          49.41943
+                        ],
+                        [
+                          8.687872,
+                          49.420318
+                        ]
+                      ],
+                      "items": {
+                        "type": "number",
+                        "description": "The waypoints to use for the route as an array of `longitude/latitude` pairs in WGS 84 (EPSG:4326)",
+                        "format": "double"
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Arbitrary identification string of the request reflected in the meta information.",
+                    "example": "my_request"
+                  },
+                  "preference": {
+                    "type": "string",
+                    "description": "Specifies the route preference",
+                    "enum": [
+                      "fastest",
+                      "shortest",
+                      "recommended",
+                      "custom"
+                    ],
+                    "default": "recommended"
+                  },
+                  "units": {
+                    "type": "string",
+                    "description": "Specifies the distance unit.",
+                    "enum": [
+                      "m",
+                      "km",
+                      "mi"
+                    ],
+                    "default": "m"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Language for the route instructions.",
+                    "enum": [
+                      "cs",
+                      "cs-cz",
+                      "da",
+                      "dk-da",
+                      "de",
+                      "de-de",
+                      "en",
+                      "en-us",
+                      "eo",
+                      "eo-eo",
+                      "es",
+                      "es-es",
+                      "eu",
+                      "eu-es",
+                      "fi",
+                      "fi-fi",
+                      "fr",
+                      "fr-fr",
+                      "gr",
+                      "gr-gr",
+                      "he",
+                      "he-il",
+                      "hu",
+                      "hu-hu",
+                      "id",
+                      "id-id",
+                      "it",
+                      "it-it",
+                      "ja",
+                      "ja-jp",
+                      "lv",
+                      "lv-lv",
+                      "lt",
+                      "lt-lt",
+                      "ne",
+                      "ne-np",
+                      "nl",
+                      "nl-nl",
+                      "nb",
+                      "nb-no",
+                      "pl",
+                      "pl-pl",
+                      "pt",
+                      "pt-pt",
+                      "ro",
+                      "ro-ro",
+                      "ru",
+                      "ru-ru",
+                      "tr",
+                      "tr-tr",
+                      "ua",
+                      "ua-ua",
+                      "vi",
+                      "vi-vn",
+                      "zh",
+                      "zh-cn"
+                    ],
+                    "default": "en"
+                  },
+                  "geometry": {
+                    "type": "boolean",
+                    "description": "Specifies whether to return geometry. ",
+                    "default": true,
+                    "x-validWhen": {
+                      "ref": "format",
+                      "value": [
+                        "json"
+                      ]
+                    }
+                  },
+                  "instructions": {
+                    "type": "boolean",
+                    "description": "Specifies whether to return instructions.",
+                    "default": true
+                  },
+                  "instructions_format": {
+                    "type": "string",
+                    "description": "Select html for more verbose instructions.",
+                    "enum": [
+                      "html",
+                      "text"
+                    ],
+                    "default": "text"
+                  },
+                  "roundabout_exits": {
+                    "type": "boolean",
+                    "description": "Provides bearings of the entrance and all passed roundabout exits. Adds the `exit_bearings` array to the step object in the response. ",
+                    "default": false
+                  },
+                  "attributes": {
+                    "type": "array",
+                    "description": "List of route attributes",
+                    "example": [
+                      "avgspeed",
+                      "percentage"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "description": "List of route attributes",
+                      "example": "[\"avgspeed\",\"percentage\"]",
+                      "enum": [
+                        "avgspeed",
+                        "detourfactor",
+                        "percentage"
+                      ]
+                    }
+                  },
+                  "maneuvers": {
+                    "type": "boolean",
+                    "description": "Specifies whether the maneuver object is included into the step object or not. ",
+                    "default": false
+                  },
+                  "radiuses": {
+                    "type": "array",
+                    "description": "A list of maximum distances (measured in metres) that limit the search of nearby road segments to every given waypoint. The values must be greater than 0, the value of -1 specifies using the maximum possible search radius. The number of radiuses correspond to the number of waypoints. If only a single value is given, it will be applied to all waypoints.",
+                    "example": [
+                      200,
+                      -1,
+                      30
+                    ],
+                    "items": {
+                      "type": "number",
+                      "description": "A list of maximum distances (measured in metres) that limit the search of nearby road segments to every given waypoint. The values must be greater than 0, the value of -1 specifies using the maximum possible search radius. The number of radiuses correspond to the number of waypoints. If only a single value is given, it will be applied to all waypoints.",
+                      "format": "double"
+                    }
+                  },
+                  "bearings": {
+                    "type": "array",
+                    "description": "Specifies a list of pairs (bearings and deviations) to filter the segments of the road network a waypoint can snap to.\n\"For example `bearings=[[45,10],[120,20]]`.\n\"Each pair is a comma-separated list that can consist of one or two float values, where the first value is the bearing and the second one is the allowed deviation from the bearing.\n\"The bearing can take values between `0` and `360` clockwise from true north. If the deviation is not set, then the default value of `100` degrees is used.\n\"The number of pairs must correspond to the number of waypoints.\n\"The number of bearings corresponds to the length of waypoints-1 or waypoints. If the bearing information for the last waypoint is given, then this will control the sector from which the destination waypoint may be reached.\n\"You can skip a bearing for a certain waypoint by passing an empty value for an array, e.g. `[30,20],[],[40,20]`.",
+                    "example": [
+                      [
+                        30,
+                        20
+                      ],
+                      [],
+                      [
+                        40,
+                        20
+                      ]
+                    ],
+                    "items": {
+                      "type": "array",
+                      "description": "Specifies a list of pairs (bearings and deviations) to filter the segments of the road network a waypoint can snap to.\n\"For example `bearings=[[45,10],[120,20]]`.\n\"Each pair is a comma-separated list that can consist of one or two float values, where the first value is the bearing and the second one is the allowed deviation from the bearing.\n\"The bearing can take values between `0` and `360` clockwise from true north. If the deviation is not set, then the default value of `100` degrees is used.\n\"The number of pairs must correspond to the number of waypoints.\n\"The number of bearings corresponds to the length of waypoints-1 or waypoints. If the bearing information for the last waypoint is given, then this will control the sector from which the destination waypoint may be reached.\n\"You can skip a bearing for a certain waypoint by passing an empty value for an array, e.g. `[30,20],[],[40,20]`.",
+                      "example": [
+                        [
+                          30,
+                          20
+                        ],
+                        [],
+                        [
+                          40,
+                          20
+                        ]
+                      ],
+                      "items": {
+                        "type": "number",
+                        "description": "Specifies a list of pairs (bearings and deviations) to filter the segments of the road network a waypoint can snap to.\n\"For example `bearings=[[45,10],[120,20]]`.\n\"Each pair is a comma-separated list that can consist of one or two float values, where the first value is the bearing and the second one is the allowed deviation from the bearing.\n\"The bearing can take values between `0` and `360` clockwise from true north. If the deviation is not set, then the default value of `100` degrees is used.\n\"The number of pairs must correspond to the number of waypoints.\n\"The number of bearings corresponds to the length of waypoints-1 or waypoints. If the bearing information for the last waypoint is given, then this will control the sector from which the destination waypoint may be reached.\n\"You can skip a bearing for a certain waypoint by passing an empty value for an array, e.g. `[30,20],[],[40,20]`.",
+                        "format": "double",
+                        "x-validWhen": {
+                          "ref": "profile",
+                          "value": "cycling-*"
+                        }
+                      },
+                      "x-validWhen": {
+                        "ref": "profile",
+                        "value": "cycling-*"
+                      }
+                    },
+                    "x-validWhen": {
+                      "ref": "profile",
+                      "value": "cycling-*"
+                    }
+                  },
+                  "continue_straight": {
+                    "type": "boolean",
+                    "description": "Forces the route to keep going straight at waypoints restricting uturns there even if it would be faster.",
+                    "default": false
+                  },
+                  "elevation": {
+                    "type": "boolean",
+                    "description": "Specifies whether to return elevation values for points. Please note that elevation also gets encoded for json response encoded polyline.",
+                    "example": false
+                  },
+                  "extra_info": {
+                    "type": "array",
+                    "description": "The extra info items to include in the response",
+                    "example": [
+                      "waytype",
+                      "surface"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "description": "Specify which extra info items to include in the response",
+                      "example": "[\"waytype\",\"surface\"]",
+                      "enum": [
+                        "steepness",
+                        "suitability",
+                        "surface",
+                        "waycategory",
+                        "waytype",
+                        "tollways",
+                        "traildifficulty",
+                        "osmid",
+                        "roadaccessrestrictions",
+                        "countryinfo",
+                        "green",
+                        "noise",
+                        "csv",
+                        "shadow"
+                      ]
+                    }
+                  },
+                  "options": {
+                    "title": "Route Options",
+                    "type": "object",
+                    "properties": {
+                      "avoid_features": {
+                        "type": "array",
+                        "description": "List of features to avoid. ",
+                        "example": [
+                          "highways"
+                        ],
+                        "items": {
+                          "type": "string",
+                          "description": "Definition of the features to be avoided.",
+                          "example": "[\"highways\"]",
+                          "enum": [
+                            "highways",
+                            "tollways",
+                            "ferries",
+                            "fords",
+                            "steps"
+                          ],
+                          "x-itemRestrictions": {
+                            "ref": "profile",
+                            "itemsWhen": {
+                              "driving-*": [
+                                "highways",
+                                "tollways",
+                                "ferries"
+                              ],
+                              "cycling-*": [
+                                "ferries",
+                                "steps",
+                                "fords"
+                              ],
+                              "foot-*": [
+                                "ferries",
+                                "fords",
+                                "steps"
+                              ],
+                              "wheelchair": [
+                                "ferries",
+                                "steps"
+                              ]
+                            }
+                          }
+                        },
+                        "x-itemRestrictions": {
+                          "ref": "profile",
+                          "itemsWhen": {
+                            "driving-*": [
+                              "highways",
+                              "tollways",
+                              "ferries"
+                            ],
+                            "cycling-*": [
+                              "ferries",
+                              "steps",
+                              "fords"
+                            ],
+                            "foot-*": [
+                              "ferries",
+                              "fords",
+                              "steps"
+                            ],
+                            "wheelchair": [
+                              "ferries",
+                              "steps"
+                            ]
+                          }
+                        }
+                      },
+                      "avoid_borders": {
+                        "type": "string",
+                        "description": "Specify which type of border crossing to avoid",
+                        "example": "controlled",
+                        "enum": [
+                          "all",
+                          "controlled",
+                          "none"
+                        ],
+                        "x-validWhen": {
+                          "ref": "profile",
+                          "value": "driving-*"
+                        }
+                      },
+                      "avoid_countries": {
+                        "type": "array",
+                        "description": "List of countries to exclude from matrix with `driving-*` profiles. Can be used together with `'avoid_borders': 'controlled'`. `[ 11, 193 ]` would exclude Austria and Switzerland. List of countries and application examples can be found [here](https://giscience.github.io/openrouteservice/technical-details/country-list). Also, ISO standard country codes cna be used in place of the numerical ids, for example, DE or DEU for Germany. ",
+                        "example": [
+                          11,
+                          193
+                        ],
+                        "items": {
+                          "type": "string",
+                          "description": "List of countries to exclude from matrix with `driving-*` profiles. Can be used together with `'avoid_borders': 'controlled'`. `[ 11, 193 ]` would exclude Austria and Switzerland. List of countries and application examples can be found [here](https://giscience.github.io/openrouteservice/technical-details/country-list). Also, ISO standard country codes cna be used in place of the numerical ids, for example, DE or DEU for Germany. ",
+                          "example": "[11,193]",
+                          "x-validWhen": {
+                            "ref": "profile",
+                            "value": "driving-*"
+                          }
+                        },
+                        "x-validWhen": {
+                          "ref": "profile",
+                          "value": "driving-*"
+                        }
+                      },
+                      "vehicle_type": {
+                        "type": "string",
+                        "description": "Definition of the vehicle type.",
+                        "enum": [
+                          "hgv",
+                          "bus",
+                          "agricultural",
+                          "delivery",
+                          "forestry",
+                          "goods",
+                          "unknown"
+                        ],
+                        "default": "hgv",
+                        "x-validWhen": {
+                          "ref": "profile",
+                          "value": "driving-hgv"
+                        }
+                      },
+                      "profile_params": {
+                        "title": "Profile Parameters",
+                        "type": "object",
+                        "properties": {
+                          "weightings": {
+                            "title": "Profile Weightings",
+                            "type": "object",
+                            "properties": {
+                              "steepness_difficulty": {
+                                "type": "integer",
+                                "description": "Specifies the fitness level for `cycling-*` profiles.\n\n level: 0 = Novice, 1 = Moderate, 2 = Amateur, 3 = Pro. The prefered gradient increases with level.",
+                                "format": "int32",
+                                "example": 2,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "cycling-*"
+                                }
+                              },
+                              "green": {
+                                "type": "number",
+                                "description": "Specifies the Green factor for `foot-*` profiles.\n\nfactor: Multiplication factor range from 0 to 1. 0 is the green routing base factor without multiplying it by the manual factor and is already different from normal routing. 1 will prefer ways through green areas over a shorter route.",
+                                "format": "float",
+                                "example": 0.4,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "foot-*"
+                                }
+                              },
+                              "quiet": {
+                                "type": "number",
+                                "description": "Specifies the Quiet factor for foot-* profiles.\n\nfactor: Multiplication factor range from 0 to 1. 0 is the quiet routing base factor without multiplying it by the manual factor and is already different from normal routing. 1 will prefer quiet ways over a shorter route.",
+                                "format": "float",
+                                "example": 0.8,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "foot-*"
+                                }
+                              },
+                              "shadow": {
+                                "type": "number",
+                                "description": "Specifies the shadow factor for `foot-*` profiles.\n\nfactor: Multiplication factor range from 0 to 1. 0 is the shadow routing base factor without multiplying it by the manual factor and is already different from normal routing. 1 will prefer ways through shadow areas over a shorter route.",
+                                "format": "float",
+                                "example": 0.4,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "foot-*"
+                                }
+                              }
+                            },
+                            "description": "Describe additional weightings to be applied to edges on the routing."
+                          },
+                          "restrictions": {
+                            "type": "object",
+                            "properties": {
+                              "length": {
+                                "type": "number",
+                                "description": "Length restriction in metres.",
+                                "format": "float",
+                                "example": 8.4,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "driving-hgv"
+                                }
+                              },
+                              "width": {
+                                "type": "number",
+                                "description": "Width restriction in metres.",
+                                "format": "float",
+                                "example": 5.6,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "driving-hgv"
+                                }
+                              },
+                              "height": {
+                                "type": "number",
+                                "description": "Height restriction in metres. ",
+                                "format": "float",
+                                "example": 4.2,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "driving-hgv"
+                                }
+                              },
+                              "axleload": {
+                                "type": "number",
+                                "description": "Axleload restriction in tons.",
+                                "format": "float",
+                                "example": 50,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "driving-hgv"
+                                }
+                              },
+                              "weight": {
+                                "type": "number",
+                                "description": "Weight restriction in tons. ",
+                                "format": "float",
+                                "example": 40,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "driving-hgv"
+                                }
+                              },
+                              "hazmat": {
+                                "type": "boolean",
+                                "description": "Specifies whether to use appropriate routing for delivering hazardous goods and avoiding water protected areas. Default is `false`. ",
+                                "default": false,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "driving-hgv"
+                                }
+                              },
+                              "surface_type": {
+                                "type": "string",
+                                "description": "Specifies the minimum surface type. Default is `sett`. ",
+                                "default": "sett",
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "wheelchair"
+                                }
+                              },
+                              "track_type": {
+                                "type": "string",
+                                "description": "Specifies the minimum grade of the route. Default is `grade1`. ",
+                                "default": "grade1",
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "wheelchair"
+                                }
+                              },
+                              "smoothness_type": {
+                                "type": "string",
+                                "description": "Specifies the minimum smoothness of the route. Default is `good`.",
+                                "enum": [
+                                  "excellent",
+                                  "good",
+                                  "intermediate",
+                                  "bad",
+                                  "very_bad",
+                                  "horrible",
+                                  "very_horrible",
+                                  "impassable"
+                                ],
+                                "default": "good",
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "wheelchair"
+                                }
+                              },
+                              "maximum_sloped_kerb": {
+                                "type": "number",
+                                "description": "Specifies the maximum height of the sloped curb in metres. Values are `0.03`, `0.06` (default), `0.1`.",
+                                "format": "float",
+                                "default": 0.6,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "wheelchair"
+                                }
+                              },
+                              "maximum_incline": {
+                                "type": "integer",
+                                "description": "Specifies the maximum incline as a percentage. `3`, `6` (default), `10`, `15.",
+                                "format": "int32",
+                                "default": 6,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "wheelchair"
+                                }
+                              },
+                              "minimum_width": {
+                                "type": "number",
+                                "description": "Specifies the minimum width of the footway in metres.",
+                                "format": "float",
+                                "example": 2.5,
+                                "x-validWhen": {
+                                  "ref": "profile",
+                                  "value": "wheelchair"
+                                }
+                              }
+                            },
+                            "description": "Describe restrictions to be applied to edges on the routing. any edges that do not match these restrictions are not traversed."
+                          },
+                          "surface_quality_known": {
+                            "type": "boolean",
+                            "description": "Specifies whether to enforce that only ways with known information on surface quality be taken into account - default false",
+                            "example": true,
+                            "x-validWhen": {
+                              "ref": "profile",
+                              "value": "wheelchair"
+                            }
+                          },
+                          "allow_unsuitable": {
+                            "type": "boolean",
+                            "description": "Specifies if ways that might not be suitable (e.g. unknown pedestrian usage) should be included in finding routes - default false",
+                            "example": true,
+                            "x-validWhen": {
+                              "ref": "profile",
+                              "value": "wheelchair"
+                            }
+                          }
+                        },
+                        "description": "Specifies additional routing parameters. For all profiles except `driving-car`.",
+                        "x-validWhen": {
+                          "valueNot": "driving-car",
+                          "ref": "profile"
+                        }
+                      },
+                      "avoid_polygons": {
+                        "type": "object",
+                        "properties": {
+                          "empty": {
+                            "type": "boolean"
+                          }
+                        },
+                        "additionalProperties": {
+                          "type": "object",
+                          "description": "Comprises areas to be avoided for the route. Formatted in GeoJSON as either a Polygon or Multipolygon object."
+                        },
+                        "description": "Comprises areas to be avoided for the route. Formatted in GeoJSON as either a Polygon or Multipolygon object."
+                      },
+                      "round_trip": {
+                        "title": "Round Trip Route Options",
+                        "type": "object",
+                        "properties": {
+                          "length": {
+                            "type": "number",
+                            "description": "The target length of the route in `m` (note that this is a preferred value, but results may be different).",
+                            "format": "float",
+                            "example": 10000
+                          },
+                          "points": {
+                            "type": "integer",
+                            "description": "The number of points to use on the route. Larger values create more circular routes.",
+                            "format": "int32",
+                            "example": 5
+                          },
+                          "seed": {
+                            "type": "integer",
+                            "description": "A seed to use for adding randomisation to the overall direction of the generated route",
+                            "format": "int64",
+                            "example": 1
+                          }
+                        },
+                        "description": "Specifies the parameters for generating round trip routes.",
+                        "example": {
+                          "length": 10000,
+                          "points": 5
+                        }
+                      }
+                    },
+                    "description": "Advanced options for routing",
+                    "example": {
+                      "avoid_borders": "controlled"
+                    }
+                  },
+                  "suppress_warnings": {
+                    "type": "boolean",
+                    "description": "Suppress warning messages in the response",
+                    "example": false
+                  },
+                  "geometry_simplify": {
+                    "type": "boolean",
+                    "description": "Specifies whether to simplify the geometry. Simplify geometry cannot be applied to routes with more than **one segment** and when `extra_info` is required.",
+                    "default": false
+                  },
+                  "skip_segments": {
+                    "type": "array",
+                    "description": "Specifies the segments that should be skipped in the route calculation. A segment is the connection between two given coordinates and the counting starts with 1 for the connection between the first and second coordinate.",
+                    "example": [
+                      2,
+                      4
+                    ],
+                    "items": {
+                      "type": "integer",
+                      "description": "Specifies the segments that should be skipped in the route calculation. A segment is the connection between two given coordinates and the counting starts with 1 for the connection between the first and second coordinate.",
+                      "format": "int32"
+                    }
+                  },
+                  "alternative_routes": {
+                    "title": "Alternative Routes",
+                    "type": "object",
+                    "properties": {
+                      "target_count": {
+                        "type": "integer",
+                        "description": "Target number of alternative routes to compute. Service returns up to this number of routes that fulfill the share-factor and weight-factor constraints.",
+                        "format": "int32",
+                        "example": 2
+                      },
+                      "weight_factor": {
+                        "type": "number",
+                        "description": "Maximum factor by which route weight may diverge from the optimal route. The default value of 1.4 means alternatives can be up to 1.4 times longer (costly) than the optimal route.",
+                        "format": "double",
+                        "example": 1.4
+                      },
+                      "share_factor": {
+                        "type": "number",
+                        "description": "Maximum fraction of the route that alternatives may share with the optimal route. The default value of 0.6 means alternatives can share up to 60% of path segments with the optimal route.",
+                        "format": "double",
+                        "example": 0.6
+                      }
+                    },
+                    "description": "Specifies whether alternative routes are computed, and parameters for the algorithm determining suitable alternatives.",
+                    "example": {
+                      "target_count": 2,
+                      "weight_factor": 1.6
+                    }
+                  },
+                  "maximum_speed": {
+                    "type": "number",
+                    "description": "The maximum speed specified by user.",
+                    "format": "double",
+                    "example": 90,
+                    "x-validWhen": {
+                      "ref": "profile",
+                      "value": "driving-*"
+                    }
+                  },
+                  "schedule": {
+                    "type": "boolean",
+                    "description": "If true, return a public transport schedule starting at <departure> for the next <schedule_duration> minutes.",
+                    "example": true,
+                    "default": false,
+                    "x-validWhen": {
+                      "ref": "profile",
+                      "value": "public-transport"
+                    }
+                  },
+                  "schedule_duration": {
+                    "type": "string",
+                    "example": "PT2H30M"
+                  },
+                  "schedule_rows": {
+                    "type": "integer",
+                    "description": "The maximum amount of entries that should be returned when requesting a schedule.",
+                    "format": "int32",
+                    "example": 3,
+                    "x-validWhen": {
+                      "ref": "schedule",
+                      "value": true
+                    }
+                  },
+                  "walking_time": {
+                    "type": "string",
+                    "example": "PT2H30M"
+                  },
+                  "ignore_transfers": {
+                    "type": "boolean",
+                    "description": "Specifies if transfers as criterion should be ignored.",
+                    "example": true,
+                    "default": false,
+                    "x-validWhen": {
+                      "ref": "profile",
+                      "value": "public-transport"
+                    }
+                  },
+                  "custom_model": {
+                    "type": "object",
+                    "properties": {
+                      "distance_influence": {
+                        "type": "number",
+                        "description": "Parameter determining the influence of the distance between two points on the edge weight",
+                        "format": "double"
+                      },
+                      "speed": {
+                        "type": "array",
+                        "description": "Array of objects describing rules to be applied to the speed of edges",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "keyword": {
+                              "type": "string",
+                              "enum": [
+                                "IF",
+                                "ELSEIF",
+                                "ELSE"
+                              ]
+                            },
+                            "condition": {
+                              "type": "string"
+                            },
+                            "operation": {
+                              "type": "string",
+                              "enum": [
+                                "MULTIPLY",
+                                "LIMIT"
+                              ]
+                            },
+                            "value": {
+                              "type": "number",
+                              "format": "double"
+                            }
+                          },
+                          "description": "Array of objects describing rules to be applied to the priority of edges"
+                        }
+                      },
+                      "priority": {
+                        "type": "array",
+                        "description": "Array of objects describing rules to be applied to the priority of edges",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "keyword": {
+                              "type": "string",
+                              "enum": [
+                                "IF",
+                                "ELSEIF",
+                                "ELSE"
+                              ]
+                            },
+                            "condition": {
+                              "type": "string"
+                            },
+                            "operation": {
+                              "type": "string",
+                              "enum": [
+                                "MULTIPLY",
+                                "LIMIT"
+                              ]
+                            },
+                            "value": {
+                              "type": "number",
+                              "format": "double"
+                            }
+                          },
+                          "description": "Array of objects describing rules to be applied to the priority of edges"
+                        }
+                      },
+                      "areas": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "description": "GeoJSON type",
+                              "default": "Feature"
+                            },
+                            "geometry": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "GeoJSON type",
+                                  "default": "Polygon"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "number",
+                                        "format": "double"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "description": "Feature geometry"
+                            }
+                          },
+                          "description": "Map of areas that can be referenced in speed and priority rules"
+                        },
+                        "description": "Map of areas that can be referenced in speed and priority rules"
+                      }
+                    },
+                    "description": "Specifies custom model for weighting.",
+                    "example": {
+                      "speed": [
+                        {
+                          "if": true,
+                          "limit_to": 100
+                        }
+                      ],
+                      "priority": [
+                        {
+                          "if": "road_class == MOTORWAY",
+                          "multiply_by": 0
+                        }
+                      ],
+                      "distance_influence": 100
+                    }
+                  }
+                },
+                "description": "The JSON body request sent to the routing service which defines options and parameters regarding the route to generate."
+              },
+              "engine": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "string",
+                    "description": "The backend version of the openrouteservice that was queried",
+                    "example": "8.0"
+                  },
+                  "build_date": {
+                    "type": "string",
+                    "description": "The date that the service was last updated",
+                    "example": "2019-02-07T14:28:11Z"
+                  },
+                  "graph_date": {
+                    "type": "string",
+                    "description": "The date that the graph data was last updated",
+                    "example": "2019-02-07T14:28:11Z"
+                  },
+                  "osm_date": {
+                    "type": "string",
+                    "description": "Timestamp of the OSM data the graph was built from",
+                    "example": "2019-02-07T14:28:11Z"
+                  }
+                },
+                "description": "Information about the openrouteservice engine used"
+              },
+              "system_message": {
+                "type": "string",
+                "description": "System message",
+                "example": "A message string configured in the service"
+              }
+            },
+            "description": "Information about the request"
+          }
+        },
+        "title": "OK",
+        "description": "Standard response for successfully processed requests. Returns GeoJSON. The decoded values of the extra information can be found [here](https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/).\n"
+      }
+    },
+    "400": {
+      "description": "The request is incorrect and therefore can not be processed.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "404": {
+      "description": "An element could not be found. If possible, a more detailed error code is provided.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "405": {
+      "description": "The specified HTTP method is not supported. For more details, refer to the EndPoint documentation.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "413": {
+      "description": "The request is larger than the server is able to process, the data provided in the request exceeds the capacity limit.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "500": {
+      "description": "An unexpected error was encountered and a more detailed error code is provided.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "501": {
+      "description": "Indicates that the server does not support the functionality needed to fulfill the request.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "503": {
+      "description": "The server is currently unavailable due to overload or maintenance.",
+      "content": {
+        "*/*": {
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

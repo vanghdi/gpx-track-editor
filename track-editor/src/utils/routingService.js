@@ -11,7 +11,7 @@ export const ROUTING_PROFILES = [
  * @param {Array<{lat:number, lng:number}>} waypoints  — at least 2 points
  * @param {string} profile  — ORS profile string
  * @param {string} apiKey   — OpenRouteService API key
- * @returns {Promise<Array<{lat:number, lng:number}>>}
+ * @returns {Promise<Array<{lat:number, lng:number, ele?:number}>>}
  */
 export async function getRoute(waypoints, profile = 'cycling-mountain', apiKey) {
   if (waypoints.length < 2) throw new Error('Need at least 2 waypoints');
@@ -28,7 +28,7 @@ export async function getRoute(waypoints, profile = 'cycling-mountain', apiKey) 
       'Content-Type': 'application/json',
       'Authorization': apiKey,
     },
-    body: JSON.stringify({ coordinates }),
+    body: JSON.stringify({ coordinates, elevation: true }),
   });
 
   if (!res.ok) {
@@ -40,5 +40,7 @@ export async function getRoute(waypoints, profile = 'cycling-mountain', apiKey) 
   const coords = data.features?.[0]?.geometry?.coordinates;
   if (!coords) throw new Error('No route found');
 
-  return coords.map(([lng, lat]) => ({ lat, lng }));
+  return coords.map(([lng, lat, ele]) => (
+    ele === undefined ? { lat, lng } : { lat, lng, ele }
+  ));
 }
