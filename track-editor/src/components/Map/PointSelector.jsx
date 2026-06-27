@@ -74,6 +74,7 @@ export default function PointSelector() {
           startIdx: start.idx,
           endTrackId: end.trackId,
           endIdx: end.idx,
+          sameTrackMode: 'direct',
           points,
         });
         cancelSelection();

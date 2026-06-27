@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
-import { areConnected, buildGpxSlicePoints } from '../utils/geoUtils';
+import { areConnected, buildGpxSlicePoints, isLoopTrack } from '../utils/geoUtils';
 
 // Distinct colours for uploaded tracks — high-contrast on OSM light basemap
 const TRACK_COLORS = [
@@ -25,6 +25,9 @@ function normaliseSegment(seg) {
   if (seg.type === 'routed' && !seg.waypoints) {
     const pts = seg.points || [];
     return { ...seg, waypoints: pts.length >= 2 ? [pts[0], pts[pts.length - 1]] : [] };
+  }
+  if (seg.type === 'gpx_slice' && !seg.sameTrackMode) {
+    return { ...seg, sameTrackMode: 'direct' };
   }
   return seg;
 }
@@ -267,7 +270,68 @@ const useTrackStore = create(
       const uploadedTracks = state.uploadedTracks;
       const startTrack = uploadedTracks.find((t) => t.id === startTrackId);
       const endTrack = uploadedTracks.find((t) => t.id === endTrackId);
-      const points = buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx);
+      const segment = state.workingTrack.segments.find((s) => s.id === id);
+      const sameTrackMode = segment?.sameTrackMode || 'direct';
+      const points = buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx, sameTrackMode);
+      if (points.length < 2) return state;
+
+      return {
+        _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+        _wt_future: [],
+        workingTrack: {
+          ...state.workingTrack,
+          segments: state.workingTrack.segments.map((s) =>
+            s.id === id
+              ? { ...s, startTrackId, startIdx, endTrackId, endIdx, points }
+              : s
+          ),
+        },
+      };
+    }),
+
+  updateGpxSliceMode: (id, sameTrackMode) =>
+    set((state) => {
+      const segment = state.workingTrack.segments.find((s) => s.id === id);
+      if (!segment || segment.type !== 'gpx_slice') return state;
+
+      const startTrack = state.uploadedTracks.find((t) => t.id === segment.startTrackId);
+      const endTrack = state.uploadedTracks.find((t) => t.id === segment.endTrackId);
+      const isSameTrack = segment.startTrackId != null && segment.startTrackId === segment.endTrackId;
+      const nextMode = isSameTrack && startTrack && isLoopTrack(startTrack) ? sameTrackMode : 'direct';
+      const points = buildGpxSlicePoints(
+        startTrack,
+        segment.startIdx,
+        endTrack,
+        segment.endIdx,
+        nextMode
+      );
+      if (points.length < 2) return state;
+
+      return {
+        _wt_history: [...state._wt_history.slice(-29), state.workingTrack],
+        _wt_future: [],
+        workingTrack: {
+          ...state.workingTrack,
+          segments: state.workingTrack.segments.map((s) =>
+            s.id === id ? { ...s, sameTrackMode: nextMode, points } : s
+          ),
+        },
+      };
+    }),
+
+  reverseGpxSliceDirection: (id) =>
+    set((state) => {
+      const segment = state.workingTrack.segments.find((s) => s.id === id);
+      if (!segment || segment.type !== 'gpx_slice') return state;
+
+      const startTrackId = segment.endTrackId;
+      const startIdx = segment.endIdx;
+      const endTrackId = segment.startTrackId;
+      const endIdx = segment.startIdx;
+      const startTrack = state.uploadedTracks.find((t) => t.id === startTrackId);
+      const endTrack = state.uploadedTracks.find((t) => t.id === endTrackId);
+      const sameTrackMode = segment.sameTrackMode || 'direct';
+      const points = buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx, sameTrackMode);
       if (points.length < 2) return state;
 
       return {

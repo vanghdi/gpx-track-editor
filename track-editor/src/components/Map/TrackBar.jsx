@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { X, ArrowLeft, ArrowRight, ArrowsLeftRight } from '@phosphor-icons/react';
+import { X, ArrowLeft, ArrowRight, ArrowsLeftRight, ArrowClockwise } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { getRoute } from '../../utils/routingService';
-import { pathDistanceKm } from '../../utils/geoUtils';
+import { isLoopTrack, pathDistanceKm } from '../../utils/geoUtils';
 
 function formatDist(km) {
   return km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(2)} km`;
@@ -61,6 +61,9 @@ function GapPill({ segIndex }) {
  */
 function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
   const removeSegment = useTrackStore((s) => s.removeSegment);
+  const updateGpxSliceMode = useTrackStore((s) => s.updateGpxSliceMode);
+  const reverseGpxSliceDirection = useTrackStore((s) => s.reverseGpxSliceDirection);
+  const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
   const setHoveredSegmentId = useTrackStore((s) => s.setHoveredSegmentId);
   const setCenterMapOn = useTrackStore((s) => s.setCenterMapOn);
@@ -68,6 +71,25 @@ function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
   const dist = formatDist(pathDistanceKm(segment.points || []));
   const isRouted = segment.type === 'routed';
   const isActive = !reorderMode && hoveredSegmentId === segment.id;
+  const sourceTrack = segment.startTrackId != null
+    ? uploadedTracks.find((track) => track.id === segment.startTrackId)
+    : null;
+  const canToggleWrap = (
+    !reorderMode &&
+    segment.type === 'gpx_slice' &&
+    segment.startTrackId != null &&
+    segment.startTrackId === segment.endTrackId &&
+    !!sourceTrack &&
+    isLoopTrack(sourceTrack)
+  );
+  const usesWrappedPath = canToggleWrap && segment.sameTrackMode === 'wrap';
+  const canReverseDirection = (
+    !reorderMode &&
+    segment.type === 'gpx_slice' &&
+    segment.startTrackId != null &&
+    segment.startTrackId === segment.endTrackId
+  );
+  const isReverseDirection = canReverseDirection && segment.startIdx > segment.endIdx;
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -98,6 +120,32 @@ function SegmentPill({ segment, index, reorderMode, isSelected, onSelect }) {
     >
       <span className="track-bar__pill-num">#{index + 1}</span>
       <span className="track-bar__pill-dist">{dist}</span>
+      {canReverseDirection && (
+        <button
+          className={`track-bar__pill-direction${isReverseDirection ? ' track-bar__pill-direction--active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            reverseGpxSliceDirection(segment.id);
+          }}
+          aria-label={isReverseDirection ? `Use forward direction for segment ${index + 1}` : `Use reverse direction for segment ${index + 1}`}
+          title={isReverseDirection ? 'Using reverse direction — click to switch to forward' : 'Use reverse direction'}
+        >
+          <ArrowLeft size={10} weight="bold" />
+        </button>
+      )}
+      {canToggleWrap && (
+        <button
+          className={`track-bar__pill-loop-toggle${usesWrappedPath ? ' track-bar__pill-loop-toggle--active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            updateGpxSliceMode(segment.id, usesWrappedPath ? 'direct' : 'wrap');
+          }}
+          aria-label={usesWrappedPath ? `Use direct path for segment ${index + 1}` : `Use wrapped path for segment ${index + 1}`}
+          title={usesWrappedPath ? 'Using wrapped loop path — click to switch to direct path' : 'Use wrapped loop path'}
+        >
+          <ArrowClockwise size={10} weight="bold" />
+        </button>
+      )}
       {!reorderMode && (
         <button
           className="track-bar__pill-remove"

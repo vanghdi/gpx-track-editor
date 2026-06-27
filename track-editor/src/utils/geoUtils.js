@@ -60,15 +60,59 @@ export function pathDistanceKm(points) {
   return total / 1000;
 }
 
+export function isLoopTrack(track) {
+  const points = track?.points || [];
+  return points.length >= 3 && areConnected(points[0], points[points.length - 1]);
+}
+
+function hasExplicitClosingPoint(points) {
+  if (points.length < 2) return false;
+  const first = points[0];
+  const last = points[points.length - 1];
+  return first.lat === last.lat && first.lng === last.lng;
+}
+
+function buildWrappedLoopSlicePoints(track, startIdx, endIdx) {
+  const points = track.points || [];
+  const lastIdx = points.length - 1;
+  const hasClosingPoint = hasExplicitClosingPoint(points);
+  const loopLength = hasClosingPoint ? lastIdx : points.length;
+  if (loopLength < 2) return [];
+
+  const normalizeIndex = (idx) => (
+    hasClosingPoint && idx === lastIdx ? 0 : idx
+  );
+
+  const startLoopIdx = normalizeIndex(startIdx);
+  const endLoopIdx = normalizeIndex(endIdx);
+  const step = startIdx > endIdx ? 1 : -1;
+
+  const loopIndices = [startLoopIdx];
+  let cursor = startLoopIdx;
+  while (cursor !== endLoopIdx) {
+    cursor = (cursor + step + loopLength) % loopLength;
+    loopIndices.push(cursor);
+  }
+
+  const wrappedPoints = loopIndices.map((idx) => points[idx]);
+  wrappedPoints[0] = points[startIdx];
+  wrappedPoints[wrappedPoints.length - 1] = points[endIdx];
+  return wrappedPoints;
+}
+
 /**
  * Build the point list for a GPX slice while preserving the user's chosen direction.
  * Same-track slices can run forward or backward; cross-track slices run from the
  * chosen start point to the chosen end point.
  */
-export function buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx) {
+export function buildGpxSlicePoints(startTrack, startIdx, endTrack, endIdx, sameTrackMode = 'direct') {
   if (!startTrack) return [];
 
   if (startTrack.id === endTrack?.id) {
+    if (sameTrackMode === 'wrap' && isLoopTrack(startTrack)) {
+      return buildWrappedLoopSlicePoints(startTrack, startIdx, endIdx);
+    }
+
     const reversed = startIdx > endIdx;
     const [from, to] = reversed ? [endIdx, startIdx] : [startIdx, endIdx];
     const points = startTrack.points.slice(from, to + 1);

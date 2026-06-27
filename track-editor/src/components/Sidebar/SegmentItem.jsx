@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { X } from '@phosphor-icons/react';
 import useTrackStore from '../../store/trackStore';
 import { getRoute } from '../../utils/routingService';
-import { pathDistanceKm } from '../../utils/geoUtils';
+import { isLoopTrack, pathDistanceKm } from '../../utils/geoUtils';
 
 function formatKm(km) {
   return km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(2)} km`;
@@ -13,7 +13,9 @@ function formatKm(km) {
 export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   const removeSegment = useTrackStore((s) => s.removeSegment);
   const insertSegmentAt = useTrackStore((s) => s.insertSegmentAt);
+  const updateGpxSliceMode = useTrackStore((s) => s.updateGpxSliceMode);
   const segments = useTrackStore((s) => s.workingTrack.segments);
+  const uploadedTracks = useTrackStore((s) => s.uploadedTracks);
   const routingProfile = useTrackStore((s) => s.routingProfile);
   const apiKey = useTrackStore((s) => s.apiKey);
   const hoveredSegmentId = useTrackStore((s) => s.hoveredSegmentId);
@@ -32,6 +34,17 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
   };
 
   const typeLabel = segment.type === 'routed' ? 'Routed link' : `GPX segment${segment.converted ? ' ~' : ''}`;
+  const sourceTrack = segment.startTrackId != null
+    ? uploadedTracks.find((track) => track.id === segment.startTrackId)
+    : null;
+  const canToggleWrap = (
+    segment.type === 'gpx_slice' &&
+    segment.startTrackId != null &&
+    segment.startTrackId === segment.endTrackId &&
+    !!sourceTrack &&
+    isLoopTrack(sourceTrack)
+  );
+  const usesWrappedPath = canToggleWrap && segment.sameTrackMode === 'wrap';
 
   const handleRouteGap = async () => {
     setRouting(true);
@@ -73,6 +86,18 @@ export default function SegmentItem({ segment, index, isLast, hasGapAfter }) {
           <X size={12} weight="bold" />
         </button>
       </div>
+
+      {canToggleWrap && (
+        <div className="segment-item__subactions">
+          <button
+            className={`btn btn--ghost btn--sm${usesWrappedPath ? ' segment-item__loop-toggle--active' : ''}`}
+            onClick={() => updateGpxSliceMode(segment.id, usesWrappedPath ? 'direct' : 'wrap')}
+            title={usesWrappedPath ? 'Switch to the direct path between these loop points' : 'Wrap across the loop closure instead of taking the direct path'}
+          >
+            {usesWrappedPath ? 'Using wrapped loop path' : 'Use wrapped loop path'}
+          </button>
+        </div>
+      )}
 
       {hasGapAfter && (
         <div className="gap-indicator">
