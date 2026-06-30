@@ -23,6 +23,18 @@ function pointDistanceMeters(a, b) {
   return haversineDistance(a, b);
 }
 
+function getSegmentAscentMeters(segment) {
+  const points = segment.points || [];
+  let ascent = 0;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const next = points[i];
+    if (!isFiniteElevation(prev) || !isFiniteElevation(next)) continue;
+    ascent += Math.max(0, next.ele - prev.ele);
+  }
+  return ascent;
+}
+
 function buildElevationLayout(segments, gapIndices) {
   const segmentMetrics = segments.map((segment) => {
     const points = segment.points || [];
@@ -347,6 +359,7 @@ export default function ElevationProfile() {
 
             const segmentNumber = segments.findIndex((segment) => segment.id === item.segment.id) + 1;
             const isHovered = hoveredSegmentId === item.segment.id;
+            const ascentMeters = Math.round(getSegmentAscentMeters(item.segment));
             return (
               <button
                 key={`${item.id}-label-${index}`}
@@ -362,7 +375,7 @@ export default function ElevationProfile() {
                 }}
                 title={`Segment #${segmentNumber}`}
               >
-                #{segmentNumber}
+                #{segmentNumber}{ascentMeters > 0 ? ` +${ascentMeters}m` : ''}
               </button>
             );
           })}

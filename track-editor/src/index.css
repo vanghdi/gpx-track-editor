@@ -2043,6 +2043,7 @@ body {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
 }
